@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>2026 素人自媒体成长模拟器 · 互动版</title>
+<style>
+  :root{
+    --bg:#0f1220; --bg2:#161a2e; --card:#1c2138; --card2:#222843;
+    --line:#2c3354; --txt:#e8ecff; --sub:#9aa3c7; --mut:#6b73a0;
+    --acc:#7c5cff; --acc2:#22d3ee; --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+    --pink:#ff5a8a; --grad:linear-gradient(135deg,#7c5cff,#22d3ee);
+    --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#232a52 0%,var(--bg) 55%) fixed;
+    color:var(--txt); line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--acc2);text-decoration:none}
+  .wrap{max-width:860px;margin:0 auto;padding:0 16px 140px}
+
+  /* 顶部标题 */
+  header.top{padding:22px 16px 6px;text-align:center}
+  header.top h1{font-size:23px;margin:0 0 4px;letter-spacing:.5px}
+  header.top h1 .em{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  header.top p{margin:0;color:var(--sub);font-size:13px}
+  .btn-ghost{
+    display:inline-block;margin-top:10px;padding:7px 14px;border:1px solid var(--line);
+    border-radius:999px;color:var(--sub);font-size:12px;cursor:pointer;background:var(--card);
+    transition:.2s;
+  }
+  .btn-ghost:hover{border-color:var(--acc);color:var(--txt)}
+
+  /* 属性面板 */
+  .stats{
+    position:sticky;top:0;z-index:30;margin:14px 0 18px;padding:12px 10px;
+    background:rgba(20,24,46,.86);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  }
+  .stats .day{font-size:12px;color:var(--sub);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .stats .day b{color:var(--acc2);font-size:14px}
+  .grid-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}
+  .stat .k{font-size:10px;color:var(--mut);white-space:nowrap}
+  .stat .v{font-size:15px;font-weight:700;margin-top:2px}
+  .stat .v small{font-size:9px;color:var(--sub);font-weight:400}
+  .bar{height:5px;border-radius:3px;background:var(--line);margin-top:6px;overflow:hidden}
+  .bar>i{display:block;height:100%;border-radius:3px;background:var(--grad)}
+
+  /* 场景卡 */
+  .scene{
+    background:linear-gradient(180deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);
+    animation:fade .35s ease;
+  }
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .scene .tag{
+    display:inline-block;font-size:11px;color:var(--acc2);border:1px solid var(--acc2);
+    border-radius:999px;padding:2px 10px;margin-bottom:10px;opacity:.9;
+  }
+  .scene h2{margin:0 0 12px;font-size:19px}
+  .scene .body{color:#d6dcff;font-size:14.5px;white-space:pre-line}
+  .scene .body .hl{color:var(--acc2);font-weight:700}
+  .scene .body .warn{color:var(--warn);font-weight:700}
+  .scene .body .bad{color:var(--bad);font-weight:700}
+  .scene .body .good{color:var(--good);font-weight:700}
+
+  /* 数据反馈框 */
+  .feedback{
+    margin:14px 0;padding:14px;border-radius:12px;border:1px dashed var(--acc);
+    background:rgba(124,92,255,.08);font-size:13.5px;
+  }
+  .feedback .big{font-size:26px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .feedback .row{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;color:var(--sub);font-size:12.5px}
+  .feedback .row b{color:var(--txt)}
+
+  /* 选项 */
+  .choices{margin-top:18px;display:flex;flex-direction:column;gap:11px}
+  .choice{
+    text-align:left;width:100%;cursor:pointer;border:1px solid var(--line);
+    background:var(--card2);color:var(--txt);border-radius:14px;padding:14px 16px;
+    font-size:14.5px;transition:.18s;position:relative;overflow:hidden;
+  }
+  .choice:hover:not(:disabled){border-color:var(--acc);transform:translateY(-2px);box-shadow:0 8px 20px rgba(124,92,255,.25)}
+  .choice:active:not(:disabled){transform:translateY(0)}
+  .choice .cl{font-weight:700;display:block;margin-bottom:3px}
+  .choice .cd{color:var(--sub);font-size:12.5px}
+  .choice:disabled{opacity:.45;cursor:not-allowed}
+  .choice .lock{position:absolute;right:12px;top:12px;font-size:11px;color:var(--warn)}
+  .choice .eff{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+  .pill{font-size:10.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--sub)}
+  .pill.up{color:var(--good);border-color:rgba(52,211,153,.4)}
+  .pill.down{color:var(--bad);border-color:rgba(251,113,133,.4)}
+
+  /* 决策日志 */
+  .log-toggle{margin:16px 0 0;font-size:12px;color:var(--sub);cursor:pointer;user-select:none}
+  .log{margin-top:10px;max-height:0;overflow:hidden;transition:.3s;border-left:2px solid var(--line);padding-left:0}
+  .log.open{max-height:600px;padding-left:14px}
+  .log .li{font-size:12.5px;color:var(--sub);margin:7px 0}
+  .log .li b{color:var(--txt)}
+
+  /* 结局 */
+  .ending{text-align:center;padding:8px 4px}
+  .ending .medal{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:32px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .ending .medal.star{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+  .ending .medal.side{background:linear-gradient(135deg,#34d399,#059669)}
+  .ending .medal.chill{background:linear-gradient(135deg,#60a5fa,#3b82f6)}
+  .ending .medal.quiet{background:linear-gradient(135deg,#a78bfa,#7c5cff)}
+  .ending .medal.giveup{background:linear-gradient(135deg,#94a3b8,#64748b)}
+  .ending .medal.burnout{background:linear-gradient(135deg,#fb7185,#ef4444)}
+  .ending h2{font-size:24px;margin:6px 0}
+  .ending .verdict{font-size:14px;color:var(--sub);white-space:pre-line;margin-top:10px;text-align:left;
+    background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px}
+
+  .restart{
+    display:block;width:100%;margin-top:18px;padding:14px;border:none;border-radius:14px;
+    background:var(--grad);color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  }
+  .restart:hover{filter:brightness(1.08)}
+
+  /* PRD 弹层 */
+  .mask{position:fixed;inset:0;background:rgba(5,7,16,.7);backdrop-filter:blur(4px);z-index:60;display:none}
+  .mask.show{display:block}
+  .sheet{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(680px,92vw);max-height:84vh;overflow:auto;z-index:61;
+    background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow);
+  }
+  .sheet h3{margin:0 0 10px;font-size:18px}
+  .sheet h4{color:var(--acc2);margin:16px 0 6px;font-size:14px}
+  .sheet p,.sheet li{font-size:13.5px;color:#d6dcff}
+  .sheet .close{position:sticky;top:0;float:right;cursor:pointer;color:var(--sub);font-size:20px;line-height:1}
+
+  /* 底部安全区 */
+  .footnote{text-align:center;color:var(--mut);font-size:11px;margin-top:26px}
+
+  @media(max-width:680px){
+    .grid-stats{grid-template-columns:repeat(3,1fr);gap:6px}
+    .stat .k{font-size:9px}
+    .stat .v{font-size:13px}
+    header.top h1{font-size:20px}
+    .scene{padding:18px 15px}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1><span class="em">2026 素人自媒体</span>成长模拟器</h1>
+  <p>点击每一步，做你的选择，体验一个素人从 0 到 1 的真实开局</p>
+  <span class="btn-ghost" id="openPrd">玩法说明 / 设计 PRD</span>
+</header>
+
+<div class="wrap">
+  <div class="stats" id="stats">
+    <div class="day"><span>当前进度</span><b id="dayLabel">第 0 天 · 还没开始</b></div>
+    <div class="grid-stats" id="statGrid"></div>
+  </div>
+
+  <div class="scene" id="scene"></div>
+
+  <div class="log-toggle" id="logToggle">▸ 查看我的决策日志</div>
+  <div class="log" id="log"></div>
+
+  <div class="footnote">模拟数据基于 2026 年公开行业基准（小红书新号首条优质曝光≈4800、抖音完播率权重≈40%、B站万播激励 15–40 元、全国约 2.5 亿自媒体账号、65% 创作者月收入＜1800 元）。剧情为教学演示，非真实收益承诺。</div>
+</div>
+
+<!-- PRD 弹层 -->
+<div class="mask" id="prdMask">
+  <div class="sheet">
+    <span class="close" id="closePrd">×</span>
+    <h3>互动模拟器 · 设计说明（PRD）</h3>
+    <h4>1. 目标用户与场景</h4>
+    <p>面向 2026 年想入行自媒体的<strong>纯素人</strong>。已有"全面架构报告 + 18 人画像库"做认知铺垫，本产品把抽象建议<strong>变成可操作的体验</strong>：用户扮演新人，每一步点击决策，直观感受"选择 → 数据反馈 → 走向分叉"。</p>
+    <h4>2. 核心机制</h4>
+    <ul>
+      <li><strong>状态机</strong>：每个场景(scene)含叙事 + 2–4 个选项；选项带属性增减(eff)、设定(set)、分支标记(flag)与门槛(req)。</li>
+      <li><strong>六维属性</strong>：精力 / 预算 / 内容力 / 粉丝 / 累计收入 / 心态，实时面板常驻。</li>
+      <li><strong>真实数据锚点</strong>：首条内容曝光按平台基线 + 内容力 + 努力度 + 赛道匹配模拟，而非随机。</li>
+      <li><strong>分支剧情</strong>：首条数据高低 → 早期顺境/挣扎；是否坚持 → 不同变现路径；危机事件 → 不同结局。</li>
+      <li><strong>多结局</strong>：爆款出圈 / 稳定副业 / 佛系记录 / 安静生长 / 中途放弃 /  burnout，由终局属性计算。</li>
+    </ul>
+    <h4>3. 交互与体验</h4>
+    <p>纯原生 HTML/CSS/JS 单文件、零依赖、可离线；移动端属性面板改为 3 列、选项大点击区；含决策日志与一键重开，鼓励"多周目"对比不同打法。</p>
+    <h4>4. 后续可扩展（已规划）</h4>
+    <ul>
+      <li>把 18 人画像库直接接入开局身份，让数值起点更真实；</li>
+      <li>加入"AI 复盘教练"在每个节点给建议；</li>
+      <li>导出 30 天成长曲线图；</li>
+      <li>增加"对标爆款""投流测试"等高级玩法节点。</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* ============== 数据基准（2026 真实行业锚点） ============== */
+const PLAT = {
+  '小红书': {base:500, cap:4800,  unit:'曝光', note:'图文友好，新号优质首条可达 ~4800 曝光；女性用户多、种草强'},
+  '抖音':   {base:300, cap:60000, unit:'播放', note:'算法推荐强，完播率权重≈40%，起号快但波动极大'},
+  'B站':    {base:200, cap:20000, unit:'播放', note:'中长视频，创作激励万播 15–40 元，粉丝黏性强'},
+  '视频号': {base:800, cap:12000, unit:'播放', note:'微信私域社交分发，冷启动靠熟人，适合带货'}
+};
+// 赛道 × 平台匹配加成（1=一般，>1 加成，<1 违和）
+const FIT = {
+  '知识干货':{'小红书':1.3,'抖音':1.1,'B站':1.4,'视频号':1.0},
+  '美食探店':{'小红书':1.2,'抖音':1.3,'B站':1.0,'视频号':1.1},
+  '穿搭美妆':{'小红书':1.5,'抖音':1.2,'B站':0.8,'视频号':0.9},
+  '搞笑剧情':{'小红书':0.9,'抖音':1.5,'B站':1.2,'视频号':1.0},
+  '生活记录':{'小红书':1.2,'抖音':1.0,'B站':1.1,'视频号':1.3}
+};
+
+/* ============== 初始状态 ============== */
+let state, logList, sceneId;
+function freshState(){
+  return {day:0, energy:100, money:500, skill:10, followers:0, income:0, mood:80,
+          niche:'', platform:'', flags:{}};
+}
+
+/* ============== 场景图（状态机） ============== */
+const SCENES = {
+  intro:{
+    tag:'开场 · 你是谁', day:0,
+    title:'2026 年春天，你刷到一条"普通人做自媒体月入过万"的视频……',
+    body:'全国已有约 <span class="hl">2.5 亿</span> 个自媒体账号，但 <span class="warn">65%</span> 的创作者月收入不到 1800 元。\n你心动了，决定也试试。先选一个最接近你当下处境的身份——这决定了你的起点资源。',
+    choices:[
+      {cl:'职场新人（月薪 6k，下班后 2 小时）', cd:'时间紧、预算少，但表达欲强',
+       set:{persona:'worker'}, eff:{money:-200,energy:70,skill:15}, next:'position',
+       effShow:{money:-200,energy:'初始70',skill:'+15'}},
+      {cl:'宝妈（带娃，碎片时间）', cd:'时间碎片化，话题天然（育儿/省钱）',
+       set:{persona:'mama'}, eff:{money:-300,energy:60,skill:10}, next:'position',
+       effShow:{money:-300,energy:'初始60',skill:'+10'}},
+      {cl:'大学生（0 预算，爱折腾）', cd:'精力满、技术灵，但没钱',
+       set:{persona:'student'}, eff:{money:0,energy:90,skill:20}, next:'position',
+       effShow:{money:'0',energy:'初始90',skill:'+20'}},
+      {cl:'斜杠青年（有技能，想变现）', cd:'有一技之长，启动资金稍多',
+       set:{persona:'slash'}, eff:{money:300,energy:75,skill:35}, next:'position',
+       effShow:{money:'+300',energy:'初始75',skill:'+35'}}
+    ]
+  },
+
+  position:{
+    tag:'第一步 · 定位', dayAuto:2,
+    title:'先想清楚：你要做哪个赛道？',
+    body:'调研显示新人最高频的方向集中在五大类。选一个你<strong>真的有点东西可讲</strong>的——坚持比天赋更重要。\n（不同赛道在不同平台表现差异很大，后面选平台会体现。）',
+    choices:[
+      {cl:'知识干货 / 职场经验', cd:'适合小红书+B站，涨粉慢但变现稳',
+       set:{niche:'知识干货'}, next:'platform'},
+      {cl:'美食探店 / 做饭', cd:'抖音+小红书吃香，需出镜或拍摄',
+       set:{niche:'美食探店'}, next:'platform'},
+      {cl:'穿搭 / 美妆', cd:'小红书最强，但竞争最卷',
+       set:{niche:'穿搭美妆'}, next:'platform'},
+      {cl:'搞笑剧情 / 段子', cd:'抖音爆发力最强，需要表演力',
+       set:{niche:'搞笑剧情'}, next:'platform'},
+      {cl:'生活记录 / Vlog', cd:'门槛最低，但涨粉最慢',
+       set:{niche:'生活记录'}, next:'platform'}
+    ]
+  },
+
+  platform:{
+    tag:'第二步 · 选平台', dayAuto:3,
+    title:'赛道定了，去哪个平台开荒？',
+    body:'四大平台 2026 年的真实生态差异很大。结合你选的「{niche}」赛道，系统已算出各平台匹配度（见每个选项后的加成标签）。',
+    choices:[
+      {cl:'小红书', cd:PLAT['小红书'].note, set:{platform:'小红书'},
+       fit:true, next:'gear'},
+      {cl:'抖音', cd:PLAT['抖音'].note, set:{platform:'抖音'},
+       fit:true, next:'gear'},
+      {cl:'B站', cd:PLAT['B站'].note, set:{platform:'B站'},
+       fit:true, next:'gear'},
+      {cl:'视频号', cd:PLAT['视频号'].note, set:{platform:'视频号'},
+       fit:true, next:'gear'}
+    ]
+  },
+
+  gear:{
+    tag:'第三步 · 启动装备', dayAuto:5,
+    title:'开拍前，你打算投入多少？',
+    body:'素人起步最怕两件事：一是<strong>没设备不敢拍</strong>，二是<strong>一上来乱花钱报课</strong>。2026 年一部手机足够起步，但基础收音/光线能明显抬升完播。',
+    choices:[
+      {cl:'纯手机直出，0 成本', cd:'省钱但画质一般，靠内容取胜',
+       eff:{money:0,skill:5}, next:'firstpost', effShow:{skill:'+5'}},
+      {cl:'加补光灯 + 收音麦（约 200 元）', cd:'一次性小投入，质感提升明显',
+       eff:{money:-200,skill:12}, req:{money:200}, next:'firstpost',
+       effShow:{money:-200,skill:'+12'}},
+      {cl:'拉朋友帮忙拍 + 简单剪辑', cd:'省设备费，但依赖他人时间',
+       eff:{energy:-10,skill:15}, next:'firstpost', effShow:{energy:'-10',skill:'+15'}},
+      {cl:'先报个 998 元"起号课"', cd:'注意：新人慎选：多数课是割韭菜',
+       eff:{money:-998,skill:8,mood:-5}, req:{money:500}, next:'firstpost',
+       effShow:{money:-998,skill:'+8',mood:'-5'}}
+    ]
+  },
+
+  firstpost:{
+    tag:'第四步 · 第一条内容', dayAuto:7,
+    title:'第一条内容，你怎么对待它？',
+    body:'这是最关键的一步。新人常犯两个错：要么<strong>过度打磨迟迟不发</strong>，要么<strong>随便发完就躺平</strong>。\n记住一个法则：<span class="hl">60 分钟完成一条</span>，先发出去再迭代。',
+    choices:[
+      {cl:'60 分钟快速试错版', cd:'先跑通流程，接受不完美',
+       eff:{energy:-15,skill:10}, set:{effort:1.0}, next:'result1',
+       effShow:{energy:'-15',skill:'+10'}},
+      {cl:'精雕细琢 3 小时版', cd:'质量更高，但更耗精力、易拖延',
+       eff:{energy:-35,skill:20}, set:{effort:1.4}, next:'result1',
+       effShow:{energy:'-35',skill:'+20'}},
+      {cl:'直接仿爆款改文案', cd:'起量快，但有抄袭/限流风险',
+       eff:{energy:-10,skill:6}, set:{effort:0.9,flagRisk:true}, next:'result1',
+       effShow:{energy:'-10',skill:'+6',risk:'高'}}
+    ]
+  },
+
+  result1:{
+    tag:'第五步 · 首条数据复盘', dayAuto:9, compute:'simFirst',
+    title:'第 9 天，第一条内容的数据回来了',
+    body:'', // 由 compute 填充
+    choices:[
+      {cl:'继续按这个节奏做', cd:'保持输出，进入坚持期', next:'keepgo'},
+      {cl:'复盘后调整方向', cd:'分析数据，优化下一条', eff:{skill:8,mood:5}, next:'keepgo',
+       effShow:{skill:'+8',mood:'+5'}}
+    ]
+  },
+
+  keepgo:{
+    tag:'第六步 · 坚持期（第 10–25 天）', dayAuto:25,
+    title:'连续发了十几条，进入平台"考察期"',
+    body:'几乎所有平台对新号都有 <span class="hl">约 30 天</span> 的流量考察。这段最容易放弃——因为前期数据平平。\n真正跑出来的号，基本都熬过了"发 20 条没水花"的阶段。你的心态和精力还剩多少？',
+    choices:[
+      {cl:'日更不断，咬牙坚持', cd:'曝光累积，但精力消耗大',
+       eff:{energy:-25,skill:15,followers:'+base'}, next:'monetize',
+       effShow:{energy:'-25',skill:'+15',followers:'流量累积'}},
+      {cl:'每周 3 更，保质为主', cd:'更可持续，涨粉稍慢',
+       eff:{energy:-8,skill:18,followers:'+base'}, next:'monetize',
+       effShow:{energy:'-8',skill:'+18',followers:'流量累积'}},
+      {cl:'数据差，想停更看看', cd:'注意：中途断更会被算法降权',
+       eff:{mood:-15,skill:2}, next:'monetize',
+       effShow:{mood:'-15'}}
+    ]
+  },
+
+  monetize:{
+    tag:'第七步 · 第一次变现尝试', dayAuto:30,
+    title:'第 30 天，你决定试试赚钱',
+    body:'到了新手最兴奋也最容易踩坑的环节。不同平台变现路径不同，且<strong>必须粉丝/内容达标才能开通</strong>。先看你够不够格：',
+    choices:[
+      {cl:'接商单 / 蒲公英（需 ~1000 粉）', cd:'门槛较高，但单笔收益好',
+       req:{followers:1000}, eff:{income:800,mood:10}, next:'crisis',
+       effShow:{income:'+800',mood:'+10'}},
+      {cl:'带货 / 橱窗（需 100–1000 粉）', cd:'边发边带，但转化看内容',
+       req:{followers:100}, eff:{income:300,mood:5}, next:'crisis',
+       effShow:{income:'+300',mood:'+5'}},
+      {cl:'知识付费 / 私域（需信任）', cd:'高客单，但需长期积累',
+       req:{followers:500}, eff:{income:500,skill:5}, next:'crisis',
+       effShow:{income:'+500',skill:'+5'}},
+      {cl:'粉丝还不够，先不急着变现', cd:'稳妥，先把内容做厚',
+       eff:{skill:10}, next:'crisis', effShow:{skill:'+10'}}
+    ]
+  },
+
+  crisis:{
+    tag:'第八步 · 危机事件', dayAuto:38,
+    title:'第 38 天，撞上了一件糟心事',
+    body:'成长路上几乎一定会遇到：<strong>限流、差评、被抄袭、或一条爆了却引来黑粉</strong>。怎么处理，决定了你能走多远。',
+    choices:[
+      {cl:'冷静复盘，按规则申诉/调整', cd:'专业应对，损失最小',
+       eff:{mood:-5,skill:10}, next:'scaling', effShow:{mood:'-5',skill:'+10'}},
+      {cl:'和黑粉对线，情绪激动', cd:'注意：情绪消耗大，容易违规',
+       eff:{mood:-20,energy:-10}, next:'scaling', effShow:{mood:'-20',energy:'-10'}},
+      {cl:'被限流就换个号重来', cd:'注意：治标不治本，浪费积累',
+       eff:{followers:-300,mood:-10}, next:'scaling', effShow:{followers:'-300',mood:'-10'}}
+    ]
+  },
+
+  scaling:{
+    tag:'第九步 · 放大还是收手', dayAuto:60,
+    title:'第 60 天，你站在一个岔路口',
+    body:'两个月下来，你对自己有了判断：这条路子<strong>到底适不适合你</strong>？是趁热打铁放大，还是回归佛系记录，或者体面收手？',
+    choices:[
+      {cl:'加大投入，往职业化走', cd:'把自媒体当正经事经营',
+       eff:{money:-300,energy:-15,skill:20,income:1200}, next:'summary',
+       effShow:{money:-300,energy:'-15',skill:'+20',income:'+1200'}},
+      {cl:'保持副业节奏，慢慢来', cd:'不焦虑，长期主义',
+       eff:{mood:15,income:400}, next:'summary',
+       effShow:{mood:'+15',income:'+400'}},
+      {cl:'体面收手，回归生活', cd:'承认不适合，也是一种清醒',
+       eff:{mood:5}, next:'summary', effShow:{mood:'+5'}}
+    ]
+  },
+
+  summary:{
+    tag:'结算', dayAuto:60, ending:true,
+    title:'', body:'', choices:[]
+  }
+};
+
+/* ============== 结局计算 ============== */
+const ENDINGS = {
+  star:{letter:'S', cls:'star', title:'爆款出圈 · 你跑出来了',
+    verdict:'粉丝与收入双高，已经摸到"职业创作者"的门槛。\n但记住：top 1% 拿走行业 47% 的收入，红利期要用来建立自己的壁垒（人设、私域、产品线），别只靠平台流量。'},
+  side:{letter:'A', cls:'side', title:'稳定副业 · 每月多一笔钱',
+    verdict:'没爆，但稳定变现，已是那 35% 月入过 1800 元以上的创作者。\n副业最怕"既要又要"——保持节奏，比一夜暴富更可持续。'},
+  chill:{letter:'B', cls:'chill', title:'佛系记录 · 自娱自乐也挺好',
+    verdict:'没赚大钱，但你坚持下来了，心态还在线。\n很多人做自媒体是为了"被看见"，记录本身就是价值。继续写，属于你的小圈子会来的。'},
+  quiet:{letter:'C', cls:'quiet', title:'安静生长 · 慢慢扎根',
+    verdict:'数据平平，但你没放弃，内容力在悄悄积累。\n平台考察期往往比想象长，很多号是第 50 条才起飞。再撑一撑。'},
+  giveup:{letter:'D', cls:'giveup', title:'中途收手 · 也是一种选择',
+    verdict:'不是每个人都适合当创作者，承认这点不丢人。\n你交的"学费"换来一个清醒：时间该花在更擅长的地方。下次想清楚再出发。'},
+  burnout:{letter:'F', cls:'burnout', title:'Burnout · 被耗干了',
+    verdict:'精力或心态见底，硬撑只会更痛苦。\n新人最大的敌人不是算法，是"急于求成"。休息一下，把节奏降下来，创作不该是酷刑。'}
+};
+
+/* ============== 渲染逻辑 ============== */
+const $ = s=>document.querySelector(s);
+function applyEff(eff){
+  if(!eff) return;
+  for(const k in eff){
+    if(k==='followers' && eff[k]==='+base'){ continue; } // 占位，下面单独加
+    if(typeof eff[k]==='number') state[k]=Math.max(-500, (state[k]||0)+eff[k]);
+  }
+}
+function applySet(set){
+  if(!set) return;
+  for(const k in set){
+    if(k==='effort'||k==='flagRisk'){ if(k==='flagRisk') state.flags.risk=true; else state.effort=set.effort; continue; }
+    if(k==='persona'||k==='niche'||k==='platform') state[k]=set[k];
+  }
+}
+function checkReq(req){
+  if(!req) return true;
+  for(const k in req){ if((state[k]||0) < req[k]) return false; }
+  return true;
+}
+function pillHtml(show){
+  if(!show) return '';
+  let h='<div class="eff">';
+  for(const k in show){
+    let cls='pill', val=show[k];
+    if(typeof val==='number'){
+      if(k==='money'||k==='energy'||k==='skill'||k==='mood'||k==='income'){
+        if(val>0){cls+=' up'; val='+'+val;} else if(val<0){cls+=' down';}
+      }
+    }
+    const name={money:'预算',energy:'精力',skill:'内容力',mood:'心态',income:'收入',followers:'粉丝',risk:'风险',effort:'努力'}[k]||k;
+    h+=`<span class="${cls}">${name} ${val}</span>`;
+  }
+  return h+'</div>';
+}
+
+function renderStats(){
+  const items=[
+    {k:'精力',v:state.energy,max:100,unit:''},
+    {k:'预算',v:state.money,max:3000,unit:'元',money:true},
+    {k:'内容力',v:state.skill,max:100,unit:''},
+    {k:'粉丝',v:state.followers,max:10000,unit:''},
+    {k:'收入',v:state.income,max:5000,unit:'元',money:true},
+    {k:'心态',v:state.mood,max:100,unit:''}
+  ];
+  let h='';
+  items.forEach(it=>{
+    let disp=it.v;
+    if(it.money && it.v>0) disp='+'+it.v;
+    if(it.v<0) disp=it.v;
+    const pct=Math.max(0,Math.min(100,(it.v/it.max)*100));
+    h+=`<div class="stat"><div class="k">${it.k}</div><div class="v">${disp}<small>${it.unit}</small></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+  });
+  $('#statGrid').innerHTML=h;
+  $('#dayLabel').textContent = sceneId==='summary' ? '第 60 天 · 已结算'
+      : `第 ${state.day} 天 · ${SCENES[sceneId].tag||''}`;
+}
+
+function computeFirst(){
+  const p=state.platform, niche=state.niche;
+  const pf=PLAT[p]; const fit=FIT[niche]? (FIT[niche][p]||1) :1;
+  const effort=state.effort||1.0;
+  const skillMul=0.6+state.skill/100;
+  let views=Math.round(pf.base*skillMul*effort*fit* (1+Math.random()*0.4));
+  // 优质内容封顶
+  if(views>pf.cap) views=pf.cap;
+  // 仿爆款风险：可能高也可能被限流
+  let riskNote='';
+  if(state.flags.risk){
+    if(Math.random()<0.5){ views=Math.round(views*2.2); riskNote='（仿爆款赌对了，流量翻倍，但埋下违规隐患）'; }
+    else { views=Math.round(views*0.3); riskNote='（被系统判定疑似搬运，限流！）'; }
+  }
+  // 互动率与涨粉
+  const interact=0.03+Math.random()*0.05; // 3%-8%
+  const inter=Math.round(views*interact);
+  const follow=Math.round(inter*(0.2+Math.random()*0.3)); // 互动转粉
+  state.views=(state.views||0)+views;
+  state.followers=state.followers+follow;
+  state.skill=Math.min(100,state.skill+5);
+  // 写回场景 body
+  SCENES.result1.body =
+    `你在 <span class="hl">${p}</span> 发了第一条「${niche}」内容。\n`+
+    `平台基线约 ${pf.base} ${pf.unit}，赛道匹配加成 ×${fit.toFixed(2)}，你的内容力让效果放大到 <span class="hl">${skillMul.toFixed(2)}×</span>。\n`+
+    (riskNote?`<span class="warn">${riskNote}</span>\n`:'');
+  return {views,inter,follow,unit:pf.unit,fit};
+}
+
+function renderScene(){
+  const sc=SCENES[sceneId];
+  if(sc.compute==='simFirst'){
+    const r=computeFirst();
+    const fb=`<div class="feedback">
+      <div>首条内容 <span class="big">${r.views.toLocaleString()}</span> ${r.unit}</div>
+      <div class="row"><span>互动 <b>${r.inter.toLocaleString()}</b></span><span>新增粉丝 <b>${r.follow}</b></span><span>赛道匹配 <b>×${r.fit.toFixed(2)}</b></span></div>
+      <div class="row" style="margin-top:8px;color:var(--sub)">${sc.body}</div>
+    </div>`;
+    sc.body=fb;
+  }
+  if(sc.ending){ renderEnding(); return; }
+
+  // 平台场景：按已选赛道计算匹配加成，注入到每个选项
+  if(sceneId==='platform'){
+    sc.choices.forEach(c=>{
+      const fit = FIT[state.niche] ? (FIT[state.niche][c.set.platform]||1) : 1;
+      const label = fit>=1.15?'[高匹配]':(fit<=0.9?'[偏低]':'[一般]');
+      c.effShow = Object.assign({}, c.effShow, {'匹配':`${label} ×${fit.toFixed(2)}`});
+    });
+  }
+
+  let bodyText = (sc.body||'').replace(/\{niche\}/g, state.niche||'该');
+  let h=`<span class="tag">${sc.tag||''}</span><h2>${sc.title}</h2><div class="body">${bodyText}</div>`;
+  h+='<div class="choices">';
+  sc.choices.forEach((c,i)=>{
+    const ok=checkReq(c.req);
+    let lock='';
+    if(!ok){
+      const need=Object.entries(c.req).map(([k,v])=>`${ {followers:'粉丝'}[k]||k }≥${v}`).join('、');
+      lock=`<span class="lock">未解锁：${need}</span>`;
+    }
+    h+=`<button class="choice" data-i="${i}" ${ok?'':'disabled'}>${lock}
+        <span class="cl">${c.cl}</span><span class="cd">${c.cd}</span>
+        ${pillHtml(c.effShow)}</button>`;
+  });
+  h+='</div>';
+  const el=$('#scene'); el.innerHTML=h;
+  el.querySelectorAll('.choice').forEach(b=>{
+    b.addEventListener('click',()=>choose(parseInt(b.dataset.i)));
+  });
+  renderStats();
+}
+
+function choose(i){
+  const sc=SCENES[sceneId];
+  const c=sc.choices[i];
+  if(!checkReq(c.req)) return;
+  // 应用效果
+  if(c.set){ if(c.set.followers==='+base'){ /* handled below */ } applySet(c.set); }
+  applyEff(c.eff);
+  // followers 累积（keepgo 里的 '+base' 占位 → 给一波增长）
+  if(c.eff && c.eff.followers==='+base'){
+    const grow=Math.round(700+state.skill*18+Math.random()*600);
+    state.followers+=grow;
+  }
+  if(c.next==='summary') state.day=60;
+  // 记录日志
+  logList.push({day:state.day, cl:c.cl, eff:c.effShow});
+  // 推进
+  if(c.next){ sceneId=c.next; }
+  if(SCENES[sceneId].dayAuto) state.day=SCENES[sceneId].dayAuto;
+  renderScene();
+  renderLog();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderLog(){
+  let h='';
+  logList.forEach(l=>{
+    let eff='';
+    if(l.eff) eff=' · '+Object.entries(l.eff).map(([k,v])=>`${ {money:'预算',energy:'精力',skill:'内容力',mood:'心态',income:'收入',followers:'粉丝',risk:'风险'}[k]||k} ${v}`).join(' ');
+    h+=`<div class="li">第 ${l.day} 天 — <b>${l.cl}</b>${eff}</div>`;
+  });
+  $('#log').innerHTML=h;
+}
+
+function renderEnding(){
+  let key;
+  if(state.mood<=0 || state.energy<=0) key='burnout';
+  else if(state.money< -200) key='giveup';
+  else if(state.followers>=2500 && state.income>=2000) key='star';
+  else if(state.income>=500) key='side';
+  else if(state.mood>=70) key='chill';
+  else key='quiet';
+  const e=ENDINGS[key];
+  const sc=SCENES.summary;
+  let h=`<div class="ending">
+    <div class="medal ${e.cls}">${e.letter}</div>
+    <h2>${e.title}</h2>
+    <div class="verdict">${e.verdict}
+
+—— 你的最终战绩 ——
+粉丝：${state.followers.toLocaleString()}　累计收入：+${state.income} 元
+内容力：${state.skill}　心态：${state.mood}　精力：${state.energy}
+赛道：${state.niche||'未定'}　平台：${state.platform||'未定'}</div>
+  </div>
+  <button class="restart" id="restart">再来一局（换种打法试试）</button>`;
+  $('#scene').innerHTML=h;
+  $('#restart').addEventListener('click',startGame);
+  renderStats();
+}
+
+/* ============== 启动 / 重开 ============== */
+function startGame(){
+  state=freshState(); logList=[]; sceneId='intro';
+  renderScene(); renderLog();
+}
+
+/* PRD 弹层 */
+$('#openPrd').addEventListener('click',()=>$('#prdMask').classList.add('show'));
+$('#closePrd').addEventListener('click',()=>$('#prdMask').classList.remove('show'));
+$('#prdMask').addEventListener('click',e=>{ if(e.target.id==='prdMask') $('#prdMask').classList.remove('show'); });
+$('#logToggle').addEventListener('click',()=>{
+  const l=$('#log'); l.classList.toggle('open');
+  $('#logToggle').textContent = l.classList.contains('open')?'▾ 收起决策日志':'▸ 查看我的决策日志';
+});
+
+startGame();
+</script>
+</body>
+</html>
