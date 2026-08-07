@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026素人自媒体成长模拟器 · 一个人，一条路，一组真实数据</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --line:#2a3140;
+    --text:#e6edf3; --muted:#9aa7b8; --accent:#ff5a5f; --accent2:#4cc9f0;
+    --green:#3ddc97; --yellow:#ffd166; --purple:#b692ff; --orange:#ff9f43;
+    --xhs:#ff2e4d; --dy:#23e3ff; --bz:#fb7299;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px}
+  a{color:var(--accent2);text-decoration:none}
+  /* ===== TOPBAR (desktop/tablet) ===== */
+  .topbar{position:sticky;top:0;z-index:90;background:rgba(14,17,22,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px}
+  .topbar .logo{font-size:15px;font-weight:800;color:var(--accent);white-space:nowrap}
+  .topbar .logo span{color:var(--muted);font-weight:400;font-size:11px;margin-left:6px}
+  /* dropdown nav */
+  .topbar .nav-drop{position:relative}
+  .topbar .nav-drop .drop-btn{padding:7px 14px;border-radius:8px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .topbar .nav-drop .drop-btn:hover{background:var(--panel2)}
+  .topbar .nav-drop .drop-menu{display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:200px;max-height:70vh;overflow-y:auto;z-index:95;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .topbar .nav-drop.open .drop-menu{display:block}
+  .drop-menu .grp{font-size:10px;color:#5b6677;padding:8px 8px 4px;text-transform:uppercase;letter-spacing:.5px}
+  .drop-menu a{display:block;padding:6px 8px;border-radius:6px;color:var(--muted);font-size:13px;cursor:pointer}
+  .drop-menu a:hover{background:var(--panel2);color:var(--text)}
+  .drop-menu a.active{background:var(--panel2);color:var(--accent)}
+  /* ===== BOTTOM TAB (mobile) ===== */
+  .bottom-tab{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;background:rgba(22,27,34,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px env(safe-area-inset-bottom,6px);justify-content:space-around}
+  .bottom-tab .bt-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 2px;cursor:pointer;color:var(--muted);font-size:9px;border-radius:8px;min-width:0;flex:1;text-align:center;line-height:1.3}
+  .bottom-tab .bt-item.active{color:var(--accent);font-weight:700;background:rgba(255,90,95,.1)}
+  /* ===== DRAWER (mobile slide-in menu) ===== */
+  .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+  .drawer-overlay.show{display:block}
+  .drawer{position:fixed;top:0;right:-320px;width:300px;max-width:85vw;height:100vh;background:var(--panel);z-index:100;overflow-y:auto;padding:18px 14px;transition:right .25s ease;border-left:1px solid var(--line)}
+  .drawer.show{right:0}
+  .drawer .drawer-close{float:right;cursor:pointer;color:var(--muted);font-size:22px;line-height:1}
+  .drawer .drawer-close:hover{color:var(--text)}
+  .drawer .grp{font-size:10px;color:#5b6677;margin:12px 0 4px 4px;text-transform:uppercase;letter-spacing:.5px}
+  .drawer a{display:block;padding:7px 10px;border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer}
+  .drawer a:hover{background:var(--panel2);color:var(--text)}
+  .drawer a.active{background:var(--panel2);color:var(--accent)}
+  /* ===== MAIN CONTENT ===== */
+  main{max-width:1100px;margin:0 auto;padding:20px 22px 140px;min-width:0}
+  .hero{background:linear-gradient(135deg,#21131a,#16202e);border:1px solid var(--line);border-radius:16px;padding:34px;margin-bottom:30px}
+  .hero h2{font-size:27px;margin-bottom:10px;background:linear-gradient(90deg,#ff5a5f,#4cc9f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);max-width:820px}
+  .persona-cards{display:flex;gap:16px;flex-wrap:wrap;margin-top:22px}
+  .pcard{flex:1;min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+  .pcard .emoji{font-size:34px}
+  .pcard h3{font-size:17px;margin:6px 0 2px}
+  .pcard .plat{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;font-weight:700;margin-bottom:8px}
+  .pcard p{font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .pcard .tag{font-size:11px;color:var(--muted)}
+  .plat-xhs{background:rgba(255,46,77,.15);color:var(--xhs)}
+  .plat-dy{background:rgba(35,227,255,.15);color:var(--dy)}
+  .plat-bz{background:rgba(251,114,153,.15);color:var(--bz)}
+  section.block{margin-bottom:42px;scroll-margin-top:14px}
+  section.block h2.stage{font-size:22px;border-left:4px solid var(--accent);padding-left:12px;margin-bottom:6px}
+  section.block .lead{color:var(--muted);margin-bottom:18px;padding-left:16px;font-size:14px}
+  /* persona tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .tab{padding:8px 16px;border-radius:10px;background:var(--panel);border:1px solid var(--line);cursor:pointer;font-size:13px;color:var(--muted);font-weight:600;transition:.15s}
+  .tab:hover{color:var(--text)}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .ptab-content{display:none}
+  .ptab-content.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:1100px){.grid2,.grid3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h4{font-size:14px;margin-bottom:8px;color:var(--accent2)}
+  .card .kv{font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .card .kv b{color:var(--text);font-weight:600}
+  .stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .stat{flex:1;min-width:90px;background:var(--panel2);border-radius:10px;padding:12px;text-align:center}
+  .stat .num{font-size:22px;font-weight:800;color:var(--green)}
+  .stat .lab{font-size:11px;color:var(--muted);margin-top:2px}
+  .note-mock{background:#fff;color:#222;border-radius:10px;padding:14px;font-size:13px;line-height:1.6}
+  .note-mock .cover{height:90px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;text-align:center;padding:8px}
+  .note-mock .meta{font-size:11px;color:#888;margin:8px 0}
+  .note-mock .body{color:#333}
+  .pill{display:inline-block;background:#ffeded;color:#d33;font-size:11px;padding:1px 7px;border-radius:5px;margin:2px}
+  .phone-mock{background:#0a0d12;border:6px solid #000;border-radius:22px;width:200px;padding:10px;margin:0 auto}
+  .phone-mock .scr{background:#161b22;border-radius:12px;padding:10px;font-size:11px}
+  .phone-mock .notif{background:#1c2230;border-radius:8px;padding:7px;margin-bottom:6px}
+  .phone-mock .notif .t{color:var(--green);font-weight:700}
+  /* callout */
+  .callout{border-radius:12px;padding:16px 18px;margin:18px 0;font-size:13.5px;border:1px solid}
+  .callout.wb{background:rgba(182,146,255,.08);border-color:rgba(182,146,255,.4)}
+  .callout.wb .ttl{color:var(--purple);font-weight:800;margin-bottom:6px;font-size:13px}
+  .callout.warn{background:rgba(255,209,102,.07);border-color:rgba(255,209,102,.4)}
+  .callout.warn .ttl{color:var(--yellow);font-weight:800;margin-bottom:6px;font-size:13px}
+  .callout.fact{background:rgba(76,201,240,.07);border-color:rgba(76,201,240,.35)}
+  .callout.fact .ttl{color:var(--accent2);font-weight:800;margin-bottom:6px;font-size:13px}
+  /* chart */
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .chart-wrap h4{font-size:13px;color:var(--muted);margin-bottom:8px}
+  svg{width:100%;height:auto;display:block}
+  table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  table.tbl th,table.tbl td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+  table.tbl th{background:var(--panel2);color:var(--muted);font-weight:600}
+  table.tbl td b{color:var(--green)}
+  .journey-line{position:relative;padding-left:24px;border-left:2px dashed var(--line);margin-left:6px}
+  .journey-line .jnode{position:relative;margin-bottom:22px}
+  .journey-line .jnode::before{content:"";position:absolute;left:-31px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+  .jnode .jt{font-weight:700;font-size:14px;margin-bottom:3px}
+  .jnode .jd{font-size:12.5px;color:var(--muted)}
+  .compare-tbl td .bar{height:8px;border-radius:4px;background:var(--accent);display:inline-block;vertical-align:middle}
+  .btn{display:inline-block;padding:9px 18px;background:var(--accent);color:#fff;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;margin-top:8px}
+  .btn:hover{opacity:.9}
+  .toc-note{font-size:12px;color:var(--muted);margin-top:10px}
+  ul.simple{margin:8px 0 8px 18px;font-size:13px;color:var(--muted)}
+  ul.simple li{margin-bottom:5px}
+  ul.simple li b{color:var(--text)}
+  .big-num{font-size:40px;font-weight:900;color:var(--accent);line-height:1}
+  /* persona library */
+  .filters{margin:18px 0;display:flex;flex-wrap:wrap;gap:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .filter-group{display:flex;flex-direction:column;gap:7px}
+  .filter-group .fg-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+  .fbtn{padding:5px 12px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:12px;cursor:pointer;transition:.15s}
+  .fbtn:hover{color:var(--text)}
+  .fbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .reset-btn{padding:6px 16px;border-radius:8px;background:transparent;border:1px dashed var(--line);color:var(--muted);font-size:12px;cursor:pointer;align-self:flex-end}
+  .reset-btn:hover{color:var(--text);border-color:var(--accent)}
+  .persona-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-top:8px}
+  .pcard2{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s}
+  .pcard2:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .pcard2 .pname{font-size:16px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .pcard2 .pavatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+  .pcard2 .ptags{display:flex;flex-wrap:wrap;gap:5px;margin:11px 0 6px}
+  .ptag{font-size:10.5px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .ptag.stage{background:rgba(255,90,95,.15);color:#ff8a8e}
+  .ptag.res{background:rgba(76,201,240,.13);color:#7fd6f5}
+  .ptag.plat{background:rgba(61,220,151,.13);color:#6fe3b3}
+  .ptag.grow{background:rgba(255,209,102,.15);color:#ffd98a}
+  .pcard2 .pone{font-size:12px;color:var(--muted);line-height:1.55}
+  .pcard2 .pcount{font-size:11px;color:var(--accent);margin-top:8px}
+  .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
+  .modal-mask.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:26px;position:relative}
+  .modal .close{position:absolute;top:18px;right:20px;cursor:pointer;color:var(--muted);font-size:24px;line-height:1}
+  .modal .close:hover{color:var(--text)}
+  .modal h3{font-size:21px;margin-bottom:2px;display:flex;align-items:center;gap:10px}
+  .modal .msub{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .modal .mrow{margin:13px 0;font-size:13.5px;line-height:1.7}
+  .modal .mrow .ml{color:var(--accent2);font-weight:700;display:block;font-size:11.5px;margin-bottom:3px;letter-spacing:.3px}
+  .modal .mrow .mv{color:var(--text)}
+  .modal .real{background:rgba(76,201,240,.07);border:1px solid rgba(76,201,240,.3);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--muted);margin-top:14px}
+  .modal .real b{color:var(--accent2)}
+  @media(max-width:1100px){.persona-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:680px){.persona-grid{grid-template-columns:1fr}}
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:1024px){
+    main{padding:16px 14px 150px}
+    .hero{padding:22px}
+    .hero h2{font-size:22px}
+    .grid2,.grid3{grid-template-columns:1fr}
+    .filters{flex-direction:column;gap:12px}
+    .persona-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+    table.tbl{font-size:11px}
+    table.tbl th,table.tbl td{padding:5px 6px}
+    .stat-row{gap:8px}
+    .stat{padding:8px;min-width:70px}
+    .stat .num{font-size:17px}
+  }
+  @media(max-width:768px){
+    .topbar{display:none}
+    .bottom-tab{display:flex}
+    main{padding:12px 10px 150px}
+    .hero{padding:16px;border-radius:12px}
+    .hero h2{font-size:19px}
+    .hero p{font-size:13px}
+    .persona-cards{flex-direction:column}
+    .pcard{min-width:100%}
+    section.block h2.stage{font-size:18px}
+    section.block .lead{font-size:12.5px;padding-left:8px}
+    .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:5px;padding-bottom:4px}
+    .tab{flex-shrink:0;font-size:11px;padding:6px 10px}
+    .chart-wrap{padding:10px}
+    .card{padding:12px}
+    .modal{max-width:95vw;padding:18px;max-height:80vh}
+    .modal h3{font-size:17px}
+    .journey-line{padding-left:16px;margin-left:2px}
+    .journey-line .jnode::before{left:-23px;width:10px;height:10px}
+    .filters{gap:8px;padding:10px}
+    .filter-group{gap:4px}
+    .fbtn{padding:4px 9px;font-size:10.5px}
+    .persona-grid{grid-template-columns:1fr}
+    .pcard2{padding:12px}
+    .pcard2 .pname{font-size:14px}
+    .pcard2 .ptags{gap:3px;margin:8px 0 4px}
+    .ptag{font-size:9.5px;padding:2px 6px}
+    .big-num{font-size:30px}
+    .callout{padding:12px 14px;font-size:12.5px}
+    .note-mock{font-size:12px;padding:10px}
+    .note-mock .cover{height:70px;font-size:12px}
+    .btn{padding:8px 14px;font-size:12px}
+    ul.simple{font-size:12px;margin-left:14px}
+    .legend{gap:8px;font-size:10px}
+  }
+  .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:50px;padding-top:20px;border-top:1px solid var(--line)}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:4px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+</style>
+</head>
+<body>
+<!-- ===== TOPBAR ===== -->
+<div class="topbar" id="topbar">
+  <div class="logo">📱 素人成长模拟器 <span>2026</span></div>
+  <div class="nav-drop" id="navDrop">
+    <button class="drop-btn" id="dropBtn">📋 目录导航 ▾</button>
+    <div class="drop-menu" id="dropMenu"></div>
+  </div>
+</div>
+
+<!-- ===== BOTTOM TAB (mobile) ===== -->
+<div class="bottom-tab" id="bottomTab">
+  <div class="bt-item active" data-target="sec-intro">概览</div>
+  <div class="bt-item" data-target="sec-1">模拟器</div>
+  <div class="bt-item" data-target="sec-library">画像库</div>
+  <div class="bt-item" data-target="sec-growth">成长</div>
+  <div class="bt-item" data-target="sec-critique">观点</div>
+  <div class="bt-item" data-target="_drawer">更多</div>
+</div>
+
+<!-- ===== DRAWER OVERLAY ===== -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+
+<main>
+  <div class="hero">
+    <h2>2026素人自媒体成长模拟器</h2>
+    <p>这不是一份"教你怎么做"的清单。我们从三个毫无经验的素人视角出发，把他们走完"从0到1"的每一步都模拟出来——包括他们<strong>写下的定位、搭好的主页、发出的第一篇内容、前30天真实感的数据曲线、踩过的坑、第一次赚到的钱</strong>。每一个数字都基于2026年公开的行业基准。读到最后，你会亲眼看到：<b>同样30天，三个人为什么走出完全不同的路。</b></p>
+    <div class="persona-cards">
+      <div class="pcard">
+        <div class="emoji" style="background:linear-gradient(135deg,#ff2e4d,#ff6a88);color:#fff;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px">林</div>
+        <h3>林小满</h3>
+        <span class="plat plat-xhs">小红书 · 图文</span>
+        <p><b>身份：</b>二线城市上班族，月薪6k，92年</p>
+        <p><b>赛道：</b>打工人省钱记账 / 个人成长</p>
+        <p class="tag">优势：真实、会算账、爱写清单</p>
+      </div>
+      <div class="pcard">
+        <div class="emoji" style="background:linear-gradient(135deg,#23e3ff,#4cc9f0);color:#003340;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px">陈</div>
+        <h3>陈默</h3>
+        <span class="plat plat-dy">抖音 · 口播</span>
+        <p><b>身份：</b>互联网运营，95年，社恐但嘴利</p>
+        <p><b>赛道：</b>职场新人避坑 / 表达技巧</p>
+        <p class="tag">优势：表达欲强、反应快</p>
+      </div>
+      <div class="pcard">
+        <div class="emoji" style="background:linear-gradient(135deg,#fb7299,#ffa7c4);color:#fff;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px">周</div>
+        <h3>老周</h3>
+        <span class="plat plat-bz">B站 · 中长视频</span>
+        <p><b>身份：</b>考研失败转行，97年，爱钻研</p>
+        <p><b>赛道：</b>普通人学习方法 / 效率工具</p>
+        <p class="tag">优势：内容有深度、肯打磨</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SEC 1 ============ -->
+  <section class="block" id="sec-1">
+    <h2 class="stage">01 · 明确定位：三圈法，不是"什么火做什么"</h2>
+    <div class="lead">新手90%会跳过这步，却恰恰最致命。我们用"我擅长 × 我热爱 × 市场需要"三圈交集找出窄定位。下面是三个人各自的定位推导。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="grid2">
+        <div class="card">
+          <h4>三圈推导</h4>
+          <p class="kv"><b>擅长：</b>记账5年、研究优惠券、月薪6k活得像8k</p>
+          <p class="kv"><b>热爱：</b>写清单、整理方法论、分享省钱小技巧</p>
+          <p class="kv"><b>市场需要：</b>小红书上"存钱/记账/攒钱"搜索量巨大，但泛内容多、细分少</p>
+          <p class="kv" style="margin-top:8px"><b>最终定位：</b></p>
+          <p style="font-size:14px;color:var(--green);font-weight:700">「月薪6k打工人的省钱记账日记」<br>固定场景：每周通勤/房租/外卖账本拆解 + 平价好物</p>
+        </div>
+        <div class="card">
+          <h4>WorkBuddy 模拟她的第一条定位草稿</h4>
+          <p class="kv">❌ 初稿：<b>"分享我的生活"</b>（太泛，算法看不懂推给谁）</p>
+          <p class="kv">✅ 终稿：<b>"月薪6k也能存下2k的记账模板分享"</b></p>
+          <ul class="simple">
+            <li>细分人群 = 月薪6k打工人</li>
+            <li>固定场景 = 每周账本复盘</li>
+            <li>明确价值 = 可复制的存钱模板</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="grid2">
+        <div class="card">
+          <h4>三圈推导</h4>
+          <p class="kv"><b>擅长：</b>互联网运营话术、面试复盘、和领导周旋</p>
+          <p class="kv"><b>热爱：</b>滔滔不绝讲职场段子、拆解话术</p>
+          <p class="kv"><b>市场需要：</b>应届生/试用期新人极度焦虑，搜"职场怎么不踩坑"量大</p>
+          <p class="kv" style="margin-top:8px"><b>最终定位：</b></p>
+          <p style="font-size:14px;color:var(--green);font-weight:700">「职场新人的避坑嘴替」<br>固定场景：周一吐槽会 / 话术拆解 / 试用期生存</p>
+        </div>
+        <div class="card">
+          <h4>关键决策</h4>
+          <p class="kv">陈默社恐，一开始纠结"要不要露脸"。</p>
+          <p class="kv">结论：<b>口播必须露脸或半露脸</b>，抖音算法对"真人出镜 + 强情绪"加权。他决定戴口罩+只拍上半身，既降低心理门槛又满足"真人感"。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="grid2">
+        <div class="card">
+          <h4>三圈推导</h4>
+          <p class="kv"><b>擅长：</b>考研备考体系、Notion/Excel效率工具、信息整理</p>
+          <p class="kv"><b>热爱：</b>把复杂方法拆成步骤、做教程</p>
+          <p class="kv"><b>市场需要：</b>B站"学习方法"是长青赛道，但需要真干货，水文活不过3集</p>
+          <p class="kv" style="margin-top:8px"><b>最终定位：</b></p>
+          <p style="font-size:14px;color:var(--green);font-weight:700">「普通人的学习方法库」<br>固定场景：备考复盘 / 效率工具实操 / 低分逆袭</p>
+        </div>
+        <div class="card">
+          <h4>B站的特殊要求</h4>
+          <p class="kv">B站用户"用脚投票"——前6秒留不住人直接划走。老周确认：<b>不做1分钟短视频，直接做5-12分钟中视频</b>，靠深度换完播和一键三连。</p>
+          <p class="kv" style="color:var(--yellow)">⚠️ 预判：B站冷启动最慢，前30天涨粉可能只有小红书/抖音的1/3，但他接受。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">💡 WorkBuddy 说（补充/反对你的思路）</div>
+      你前面报告里说"找没人做的蓝海"，这句话我得<b>反对一半</b>：完全空白的市场往往=没人需要。真实打法是在成熟赛道里找<b>差异化切口</b>。三个人都没有找"没人做"的领域，而是都在红海里切了更窄的口子（6k打工人 / 试用期新人 / 普通人方法），这才是对的。另外我补一点：<b>定位不是一次定死，而是用前10条数据反推的</b>——先发3个方向各5条，数据会告诉你该留哪个。
+    </div>
+  </section>
+
+  <!-- ============ SEC 2 ============ -->
+  <section class="block" id="sec-2">
+    <h2 class="stage">02 · 选择平台：先死磕一个，5000粉再分发</h2>
+    <div class="lead">新手最大的坑是"全平台同时做"，结果每个平台都浅尝辄止。三人的选择已经由赛道决定，但我们要看他们各自面临的平台真实环境。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="grid2">
+        <div class="card">
+          <h4>为什么选小红书</h4>
+          <ul class="simple">
+            <li>月活3.5亿，新人友好，<b>搜索流量永久留存</b></li>
+            <li>图文门槛最低，一部手机即可</li>
+            <li>收藏权重最高 → 省钱模板天然适合被收藏</li>
+            <li>女性用户多、消费力强，后续带货顺</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>2026真实环境预警</h4>
+          <p class="kv">⚠️ 新号不投流，<b>单篇浏览量大多卡在500以内</b></p>
+          <p class="kv">⚠️ 平台已封120万个AI托管账号，纯搬运死路一条</p>
+          <p class="kv">✅ 去头部化：算法不看粉丝数，看完播/互动/停留</p>
+          <p class="kv" style="color:var(--yellow)">小满的策略：靠"省钱模板"做长尾搜索流量，不追热点。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="grid2">
+        <div class="card">
+          <h4>为什么选抖音</h4>
+          <ul class="simple">
+            <li>流量天花板最高，0粉也有破10万播放案例</li>
+            <li>口播类算法扶持，情绪强的内容爆发快</li>
+            <li>变现链路最短：橱窗/星图/直播</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>2026算法权重（真实）</h4>
+          <table class="tbl">
+            <tr><th>指标</th><th>权重</th><th>及格线</th></tr>
+            <tr><td>完播率</td><td><b>40%</b></td><td>30%+</td></tr>
+            <tr><td>互动率</td><td><b>30%</b></td><td>5%+</td></tr>
+            <tr><td>粉丝转化</td><td>15%</td><td>—</td></tr>
+            <tr><td>复看率</td><td>15%</td><td>—</td></tr>
+          </table>
+          <p class="kv" style="color:var(--yellow);margin-top:6px">⚠️ 新排序：收藏率&gt;复访率&gt;铁粉互动&gt;完播率&gt;评论&gt;点赞&gt;转发</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="grid2">
+        <div class="card">
+          <h4>为什么选B站</h4>
+          <ul class="simple">
+            <li>粉丝粘性最高，长尾流量极强</li>
+            <li>深度学习类内容稀缺，容易建立专业人设</li>
+            <li>千粉即开通创作激励，粉丝忠诚度高</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>2026真实环境预警</h4>
+          <p class="kv">⚠️ 创作激励<b>已多次下调</b>，万播放约15-40元</p>
+          <p class="kv">⚠️ 千粉账号月收入仅<b>几十到三百元</b></p>
+          <p class="kv">✅ 花火商单才是大头：万粉单条约5000元</p>
+          <p class="kv" style="color:var(--yellow)">老周预判：前3个月靠激励赚不到饭钱，必须冲商单。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout fact">
+      <div class="ttl">📌 关键事实</div>
+      根据2026年公开数据：小红书月活3.5亿、抖音日活超6亿、B站月活约3.4亿。三个平台用户画像完全不同——小红书年轻女性、抖音全年龄、B站Z世代男性偏多。选错平台=用错语言对话错的人。
+    </div>
+  </section>
+
+  <!-- ============ SEC 3 ============ -->
+  <section class="block" id="sec-3">
+    <h2 class="stage">03 · 账号搭建：主页是陌生人了解你的第一扇窗</h2>
+    <div class="lead">前5条内容直接决定系统给你的初始标签。下面是把三个人的主页"搭出来"的真实样子。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="grid3">
+        <div class="card">
+          <h4>头像</h4>
+          <div style="text-align:center"><span style="display:inline-block;background:linear-gradient(135deg,#ff2e4d,#ff6a88);color:#fff;border-radius:50%;width:56px;height:56px;line-height:56px;font-size:22px;font-weight:800">林</span></div>
+          <p class="kv" style="margin-top:6px">真人自拍+笑脸，不遮脸（记账号需要"可信熟人感"）</p>
+        </div>
+        <div class="card">
+          <h4>昵称</h4>
+          <p style="font-size:20px;font-weight:800;color:var(--green)">小满的存钱罐</p>
+          <p class="kv">≤6字、带行业词"存钱"、有记忆点</p>
+        </div>
+        <div class="card">
+          <h4>简介（3句公式）</h4>
+          <p class="kv">92年打工人｜月薪6k存下2k<br>分享记账模板+平价好物<br>每周更新，关注一起变富</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h4>养号动作（第1-3天）</h4>
+        <p class="kv">只刷"记账/存钱/省钱"内容 → 正常点赞 → 写15字以上走心评论（不批量）→ 第4天发第一篇。目的：让算法确认"这是个垂直省钱号"。</p>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="grid3">
+        <div class="card">
+          <h4>头像</h4>
+          <div style="text-align:center"><span style="display:inline-block;background:linear-gradient(135deg,#23e3ff,#4cc9f0);color:#003340;border-radius:50%;width:56px;height:56px;line-height:56px;font-size:22px;font-weight:800">陈</span></div>
+          <p class="kv" style="margin-top:6px">半露脸戴口罩（社恐折中方案）</p>
+        </div>
+        <div class="card">
+          <h4>昵称</h4>
+          <p style="font-size:20px;font-weight:800;color:var(--green)">职场嘴替陈默</p>
+          <p class="kv">"嘴替"暗示替你说真话，有人设感</p>
+        </div>
+        <div class="card">
+          <h4>简介</h4>
+          <p class="kv">前互联网运营｜专治职场窝囊气<br>周一吐槽/话术拆解/试用期生存<br>每天18:30更新，敢说的那种</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="grid3">
+        <div class="card">
+          <h4>头像</h4>
+          <div style="text-align:center"><span style="display:inline-block;background:linear-gradient(135deg,#fb7299,#ffa7c4);color:#fff;border-radius:50%;width:56px;height:56px;line-height:56px;font-size:22px;font-weight:800">周</span></div>
+          <p class="kv" style="margin-top:6px">手写字体+书本元素，知识感</p>
+        </div>
+        <div class="card">
+          <h4>昵称</h4>
+          <p style="font-size:20px;font-weight:800;color:var(--green)">老周的学习方法</p>
+          <p class="kv">直白，搜索"学习方法"能命中</p>
+        </div>
+        <div class="card">
+          <h4>简介</h4>
+          <p class="kv">考研失败转行的普通人<br>只分享真用过的学习/效率方法<br>周更2-3，不灌水</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="ttl">⚠️ 新手红线（三人共同牢记）</div>
+      ① 头像别用风景/网图/动物图 → 显得没真人运营；② 前5条别换方向 → 标签会乱；③ 别一上来发硬广 → 2026各平台严查营销号，价值前置广告后置。
+    </div>
+  </section>
+
+  <!-- ============ SEC 4 ============ -->
+  <section class="block" id="sec-4">
+    <h2 class="stage">04 · 内容规划：建立可持续选题库（最拉开差距的环节）</h2>
+    <div class="lead">会做自媒体和不会做的人，差距全在选题库。我们看三个人各自的第一批选题从哪来。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="card">
+        <h4>小满的选题库（搜索联想词法，5分钟一个）</h4>
+        <p class="kv">搜"记账"下拉联想词 → 直接当标题：</p>
+        <ul class="simple">
+          <li><b>记账app哪个好用</b>（测评类）</li>
+          <li><b>记账模板excel免费</b>（资源类·高收藏）</li>
+          <li><b>月薪5k怎么存钱</b>（方法类）</li>
+          <li><b>记账坚持不下来怎么办</b>（痛点类）</li>
+          <li>评论区挖金："工资到手先存还是先花？"→ 做成一期</li>
+        </ul>
+        <p class="kv" style="margin-top:8px;color:var(--green)">3+1模式：每周3条常规（记账模板/好物）+1条互动（"晒你的账单"话题）</p>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="card">
+        <h4>陈默的选题库（对标拆解+评论区）</h4>
+        <ul class="simple">
+          <li>对标10-50w粉职场号，拆解爆款5要素</li>
+          <li><b>"领导说'辛苦了'怎么回"</b>（话术类·易爆）</li>
+          <li><b>"试用期千万别做的3件事"</b>（避坑类）</li>
+          <li><b>"被同事甩锅怎么优雅反击"</b>（情绪类）</li>
+          <li>评论区高频："要不要和领导吃饭？"→ 下一期</li>
+        </ul>
+        <p class="kv" style="margin-top:8px;color:var(--green)">前3秒强钩子模板："月薪4千别乱听HR画饼——"</p>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="card">
+        <h4>老周的选题库（深度优先，慢工出活）</h4>
+        <ul class="simple">
+          <li><b>"我用Notion搭了备考系统"</b>（实操长视频）</li>
+          <li><b>"低分逆袭：我的错题本方法"</b>（方法论）</li>
+          <li><b>"考研失败后的3条出路"</b>（情感+干货）</li>
+          <li>评论区："在职备考怎么安排时间？"→ 专题</li>
+        </ul>
+        <p class="kv" style="margin-top:8px;color:var(--green)">每期5-12分钟，周更2-3，宁可少发不可水发</p>
+      </div>
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">💡 WorkBuddy 说</div>
+      我<b>强烈补充</b>一点：选题库不是列标题就完了，要标"内容形式+预计时长+素材来源"。三个人都该用Notion/飞书建一张表，每条标注状态（待写/拍摄中/已发/数据好复用）。否则第10条之后必然断更——这是90%新人死在第2个月的原因。另外反对"日更迷信"：<b>小红书/抖音可以日更，B站绝对不要日更</b>，质量优先。
+    </div>
+  </section>
+
+  <!-- ============ SEC 5 ============ -->
+  <section class="block" id="sec-5">
+    <h2 class="stage">05 · 工具准备：2026年最低成本起步装备</h2>
+    <div class="lead">先完成再完美。下面是三个人真实花出去的第一笔钱，以及他们怎么用AI。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="grid2">
+        <div class="card">
+          <h4>装备清单</h4>
+          <table class="tbl">
+            <tr><th>用途</th><th>工具</th><th>花费</th></tr>
+            <tr><td>拍摄</td><td>手机（现有）</td><td>0</td></tr>
+            <tr><td>封面</td><td>稿定设计/Canva</td><td>免费版</td></tr>
+            <tr><td>图片</td><td>Unsplash</td><td>0</td></tr>
+            <tr><td>排版</td><td>Notion选题库</td><td>0</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h4>AI怎么用（合规）</h4>
+          <p class="kv">用Kimi/文心一言<b>辅助写标题</b>，但正文100%自己写（省钱是亲身经历）</p>
+          <p class="kv">⚠️ 真人经历类内容<b>不标AI</b>（因为本来就没用AI生成），但用AI修图会在简介声明"封面AI辅助"</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="grid2">
+        <div class="card">
+          <h4>装备清单</h4>
+          <table class="tbl">
+            <tr><th>用途</th><th>工具</th><th>花费</th></tr>
+            <tr><td>拍摄</td><td>手机+60元补光灯</td><td>60元</td></tr>
+            <tr><td>收音</td><td>有线耳机麦</td><td>已有</td></tr>
+            <tr><td>剪辑</td><td>剪映</td><td>0</td></tr>
+            <tr><td>提词</td><td>轻抖悬浮提词器</td><td>免费</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h4>AI提效</h4>
+          <p class="kv">用AI生成<b>脚本初稿框架</b> → 陈默注入真实职场段子 → 口语化改写</p>
+          <p class="kv">⚠️ 口播视频若用AI数字人替代真人，<b>必须打"AI生成"标识</b>，否则限流。陈默坚持真人出镜，规避风险。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="grid2">
+        <div class="card">
+          <h4>装备清单</h4>
+          <table class="tbl">
+            <tr><th>用途</th><th>工具</th><th>花费</th></tr>
+            <tr><td>拍摄</td><td>手机+补光</td><td>60元</td></tr>
+            <tr><td>剪辑</td><td>剪映专业版</td><td>0</td></tr>
+            <tr><td>字幕</td><td>剪映自动识别</td><td>0</td></tr>
+            <tr><td>录屏</td><td>OBS</td><td>0</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h4>AI提效</h4>
+          <p class="kv">用AI把长文稿<b>生成章节大纲</b>、自动加字幕、做封面图</p>
+          <p class="kv">⚠️ B站对"AI洗稿长视频"查得严，老周的原则：AI只做"脏活"（字幕/剪辑），<b>观点和结构必须原创</b>。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout fact">
+      <div class="ttl">📌 2026合规红线</div>
+      AI生成内容必须在显著位置标注。虚构演绎必须加注"剧情演绎"标签。用无版权图片/音乐会被投诉侵权。三人第一笔总花费：小满0元、陈默60元、老周60元——<b>自媒体是启动成本最低的副业之一</b>。
+    </div>
+  </section>
+
+  <!-- ============ SEC 6 ============ -->
+  <section class="block" id="sec-6">
+    <h2 class="stage">06 · 发布运营：第一条内容长什么样？</h2>
+    <div class="lead">同一内容，不同时间发、不同方式发，数据可能差3倍。我们把三个人的"第一条"真实还原。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="grid2">
+        <div class="note-mock">
+          <div class="cover" style="background:linear-gradient(135deg,#ff6a88,#ff99ac)">月薪6k也能存2k<br>我的记账模板</div>
+          <div class="meta">📌 记账模板 · 存钱 · 打工人</div>
+          <div class="body">92年打工人真实账本公开👀 不是鸡汤，是能直接抄的Excel模板。<br><br>✅ 工资到手先转20%去死期<br>✅ 外卖设50元红线<br>✅ 用3个app自动归类<br><br>评论扣"模板"发你📩 一起攒钱！</div>
+          <div style="margin-top:8px"><span class="pill">#记账</span><span class="pill">#存钱</span><span class="pill">#打工人</span></div>
+        </div>
+        <div class="card">
+          <h4>首篇数据（24h）</h4>
+          <div class="stat-row">
+            <div class="stat"><div class="num">4,800</div><div class="lab">阅读</div></div>
+            <div class="stat"><div class="num">3.2%</div><div class="lab">互动率</div></div>
+            <div class="stat"><div class="num">142</div><div class="lab">收藏</div></div>
+          </div>
+          <p class="kv">发布时间：周日 20:30（打工人刷手机高峰）</p>
+          <p class="kv" style="color:var(--green)">✅ 高于新号平均（500以内），首篇优质=给账号打上"好号"标签</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="grid2">
+        <div class="card">
+          <h4>第一条口播脚本（前3秒）</h4>
+          <p class="kv" style="color:var(--accent)">钩子："领导说'辛苦了'，你回'应该的'？恭喜你被拿捏了。"</p>
+          <p class="kv">正文：3种回法（给面子/给台阶/反将一军），每条配真实案例</p>
+          <p class="kv">结尾："你领导最常说哪句？评论区我教你接"</p>
+          <p class="kv">时长：38秒 ｜ 制作：脚本15分+拍摄10分+剪辑15分</p>
+        </div>
+        <div class="card">
+          <h4>首篇数据（24h）</h4>
+          <div class="stat-row">
+            <div class="stat"><div class="num">1,240</div><div class="lab">播放</div></div>
+            <div class="stat"><div class="num">41%</div><div class="lab">完播率</div></div>
+            <div class="stat"><div class="num">6.8%</div><div class="lab">互动率</div></div>
+          </div>
+          <p class="kv">发布时间：周一 18:30（职场人下班通勤）</p>
+          <p class="kv" style="color:var(--green)">✅ 完播率过40%及格线，进入下一级流量池</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="grid2">
+        <div class="card">
+          <h4>第一条视频标题/结构</h4>
+          <p class="kv" style="color:var(--accent)">标题："考研失败后，我用这3个方法重新跑通学习系统"</p>
+          <p class="kv">结构：0-30s 自我介绍痛点 → 3个方法各2分钟 → 结尾引导一键三连</p>
+          <p class="kv">时长：8分12秒 ｜ 制作：写稿1h+录屏剪辑2h</p>
+        </div>
+        <div class="card">
+          <h4>首篇数据（24h）</h4>
+          <div class="stat-row">
+            <div class="stat"><div class="num">320</div><div class="lab">播放</div></div>
+            <div class="stat"><div class="num">52%</div><div class="lab">完播率</div></div>
+            <div class="stat"><div class="num">11</div><div class="lab">三连</div></div>
+          </div>
+          <p class="kv">发布时间：周五 20:00（B站周末流量高峰）</p>
+          <p class="kv" style="color:var(--yellow)">⚠️ 播放低但完播率高，B站算法会给长尾推荐</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">💡 WorkBuddy 说</div>
+      注意三个人首篇数据的巨大差异：小满4800阅读、陈默1240播放但完播高、老周只有320播放。这恰恰说明<b>平台基数不同不能横向比</b>。新人最容易犯的错就是"我播放比他低所以我废物"——错，要看<b>相对平台的及格线</b>。小满的4800在新号里算优秀，老周的320在B站冷启动里也正常。比的对象应该是"上周的自己"。
+    </div>
+  </section>
+
+  <!-- ============ SEC 7 ============ -->
+  <section class="block" id="sec-7">
+    <h2 class="stage">07 · 数据复盘：一次只改一个变量</h2>
+    <div class="lead">新手和高手的差距，差在复盘。我们把三个人第1-30天的关键指标做成曲线。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="chart-wrap">
+        <h4>小满 · 前12篇笔记阅读量（新号冷启动→起量）</h4>
+        <div id="chart-xhs-views"></div>
+        <div class="legend"><span><span class="dot" style="background:var(--xhs)"></span>单篇阅读量</span><span>第8篇"记账模板Excel"爆了→被搜索长尾持续推</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h4>复盘结论（第30天）</h4>
+        <ul class="simple">
+          <li>资源类（模板/清单）<b>收藏率最高</b>→ 后续多推"可保存"内容</li>
+          <li>纯吐槽类阅读低 → 砍掉</li>
+          <li>最佳发布时间：周日/周三 20:30</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="chart-wrap">
+        <h4>陈默 · 前20条视频播放量（典型的"脉冲式"曲线）</h4>
+        <div id="chart-dy-views"></div>
+        <div class="legend"><span><span class="dot" style="background:var(--dy)"></span>单条播放量</span><span>第7、11、14条出现爆款脉冲，其余在谷底</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h4>复盘结论</h4>
+        <ul class="simple">
+          <li>爆款共性：<b>情绪强+具体场景</b>（"被甩锅""画饼"）</li>
+          <li>谷底共性：选题太泛、钩子弱</li>
+          <li>策略：<b>复制爆款结构</b>，不再赌每条都火</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="chart-wrap">
+        <h4>老周 · 前8期视频播放量（慢热长尾型）</h4>
+        <div id="chart-bz-views"></div>
+        <div class="legend"><span><span class="dot" style="background:var(--bz)"></span>单期播放量</span><span>无爆款脉冲，但每期都有稳定长尾</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h4>复盘结论</h4>
+        <ul class="simple">
+          <li>B站不看单条爆发，看<b>累计权重</b></li>
+          <li>第6期"错题本方法"长尾最好 → 做系列化</li>
+          <li>不追热点，做"常青内容"</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="ttl">⚠️ 复盘铁律</div>
+      "一次只改一个变量"——不要同时换标题+封面+时间，否则不知道哪个起作用。频率：每周一次，不每天看（太碎片看不出规律）。
+    </div>
+  </section>
+
+  <!-- ============ SEC 8 ============ -->
+  <section class="block" id="sec-8">
+    <h2 class="stage">08 · 变现路径：第一块钱什么时候来？</h2>
+    <div class="lead">变现不是终点，是每一步都在铺的路。三个人触达第一笔收入的时点完全不同。</div>
+
+    <div class="tabs">
+      <div class="tab active" data-p="xhs">林小满 · 小红书</div>
+      <div class="tab" data-p="dy">陈默 · 抖音</div>
+      <div class="tab" data-p="bz">老周 · B站</div>
+    </div>
+
+    <div class="ptab-content active" data-p="xhs">
+      <div class="card">
+        <h4>小满变现时间线</h4>
+        <table class="tbl">
+          <tr><th>时间</th><th>方式</th><th>收入</th></tr>
+          <tr><td>第0天起</td><td>无（先积累）</td><td>0</td></tr>
+          <tr><td>第42天（破1000粉）</td><td>蒲公英商单（平价文具）</td><td><b>300元</b></td></tr>
+          <tr><td>第60天</td><td>笔记带货佣金</td><td>月均200元</td></tr>
+          <tr><td>第90天</td><td>记账模板付费合集</td><td>月均500元</td></tr>
+        </table>
+        <p class="kv" style="margin-top:8px;color:var(--green)">✅ 小红书千粉即可接广告，是三人中变现最快的</p>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="dy">
+      <div class="card">
+        <h4>陈默变现时间线</h4>
+        <table class="tbl">
+          <tr><th>时间</th><th>方式</th><th>收入</th></tr>
+          <tr><td>第0-30天</td><td>无（先冲播放）</td><td>0</td></tr>
+          <tr><td>第35天（破1000粉）</td><td>橱窗带货（职场书）</td><td>月均150元</td></tr>
+          <tr><td>第55天</td><td>星图商单（招培机构）</td><td>单条800元</td></tr>
+          <tr><td>第90天</td><td>知识付费（话术课）</td><td>月均1500元</td></tr>
+        </table>
+        <p class="kv" style="margin-top:8px;color:var(--green)">✅ 抖音爆发快但商单不稳定，靠爆款带动</p>
+      </div>
+    </div>
+
+    <div class="ptab-content" data-p="bz">
+      <div class="card">
+        <h4>老周变现时间线</h4>
+        <table class="tbl">
+          <tr><th>时间</th><th>方式</th><th>收入</th></tr>
+          <tr><td>第0-60天</td><td>创作激励（万播15-40元）</td><td>月均80元</td></tr>
+          <tr><td>第75天（破1000粉）</td><td>充电计划</td><td>月均100元</td></tr>
+          <tr><td>第100天（破1万粉）</td><td>花火商单</td><td>单条约5000元</td></tr>
+        </table>
+        <p class="kv" style="margin-top:8px;color:var(--yellow)">⚠️ B站最慢，前3个月几乎赚不到钱，但破万粉后单笔商单最高</p>
+      </div>
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">💡 WorkBuddy 说（重要反对）</div>
+      我必须<b>反对"先涨粉再变现"这个常见误区</b>。正确顺序是：<b>从第一天就设计变现路径</b>。小满从第一条就开始在简介放"模板可分享"，为后续付费合集铺路；老周虽然前3个月没钱，但每条都在攒"可信人设"这个资产。新人最该记住的一句话：<b>"1000个精准私域粉 &gt; 10万公域泛粉"</b>。别盯着粉丝数，盯着信任。
+    </div>
+  </section>
+
+  <!-- ============ SEC 9 ============ -->
+  <section class="block" id="sec-9">
+    <h2 class="stage">09 · 心理建设：90%的人死在第3个月</h2>
+    <div class="lead">数据显示：90%从业者因心态脆弱无法坚持3个月；87%新手在发第10篇前放弃。我们看三个人各自的心理关卡。</div>
+
+    <div class="grid3">
+      <div class="card">
+        <h4><span style="display:inline-block;background:linear-gradient(135deg,#ff2e4d,#ff6a88);color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;margin-right:6px">林</span>小满的心理线</h4>
+        <p class="kv">第1周：完美主义，"封面不好看不敢发"→ 逼自己60分钟发</p>
+        <p class="kv">第3周：首篇4800，信心暴涨</p>
+        <p class="kv">第6周：有篇只有200阅读，怀疑"是不是不行了"→ 看长尾数据恢复</p>
+        <p class="kv" style="color:var(--green)">✅ 心态稳，靠"小目标"撑过瓶颈</p>
+      </div>
+      <div class="card">
+        <h4><span style="display:inline-block;background:linear-gradient(135deg,#23e3ff,#4cc9f0);color:#003340;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;margin-right:6px">陈</span>陈默的心理线</h4>
+        <p class="kv">第1周：社恐面对镜头僵硬→ 戴口罩半露脸解决</p>
+        <p class="kv">第2周：连发5条都几百播放，想放弃</p>
+        <p class="kv">第3周：第7条突然破8千，续命</p>
+        <p class="kv" style="color:var(--yellow)">⚠️ 数据焦虑最严重，靠"不每天刷"自救</p>
+      </div>
+      <div class="card">
+        <h4><span style="display:inline-block;background:linear-gradient(135deg,#fb7299,#ffa7c4);color:#fff;border-radius:50%;width:24px;height:24px;text-align:center;line-height:24px;font-size:12px;margin-right:6px">周</span>老周的心理线</h4>
+        <p class="kv">第1月：播放个位数起步，最孤独</p>
+        <p class="kv">第2月：有老粉留言"有用"，动力回来</p>
+        <p class="kv">第3月：破千粉，决定坚持</p>
+        <p class="kv" style="color:var(--green)">✅ 预期管理最好（本来就知道B站慢）</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="ttl">⚠️ 行业心理健康警示（真实数据）</div>
+      90%创作者每天研究热点超6小时；70%主播日均直播超10小时；作息紊乱、缺乏社保是常态。一次流量腰斩=数月努力归零。<b>建议：兼职起步，不要裸辞！</b>等自媒体收入稳定超主业50%再转型。
+    </div>
+  </section>
+
+  <!-- ============ SEC 10 ============ -->
+  <section class="block" id="sec-10">
+    <h2 class="stage">10 · 30天快速起号执行计划</h2>
+    <div class="lead">把三个人的30天浓缩成一张可复制的表。注意：节奏因平台而异。</div>
+
+    <table class="tbl">
+      <tr><th>阶段</th><th>小红书·小满</th><th>抖音·陈默</th><th>B站·老周</th></tr>
+      <tr><td><b>第1-3天</b></td><td>定位+养号+搭主页</td><td>定位+设备+写5脚本</td><td>定位+写首期稿</td></tr>
+      <tr><td><b>第4-10天</b></td><td>发4篇笔记，测风格</td><td>日更，发7条</td><td>发2期中视频</td></tr>
+      <tr><td><b>第11-20天</b></td><td>放大爆款模板</td><td>复制爆款结构</td><td>稳定周更2期</td></tr>
+      <tr><td><b>第21-30天</b></td><td>系列化+规划变现</td><td>系列化+开橱窗</td><td>系列化+冲千粉</td></tr>
+      <tr><td><b>30天成果</b></td><td><b>1800粉</b></td><td><b>12000粉</b></td><td><b>800粉</b></td></tr>
+    </table>
+
+    <div class="callout fact">
+      <div class="ttl">📌 关键洞察</div>
+      同样是30天全职投入：陈默涨粉最快（抖音脉冲），小满最稳（小红书搜索长尾），老周最慢但粉丝最铁（B站粘性）。<b>没有"最好"的平台，只有最适合你内容形式的平台。</b>
+    </div>
+  </section>
+
+  <!-- ============ SEC 11 ============ -->
+  <section class="block" id="sec-11">
+    <h2 class="stage">11 · 2026趋势：新人真正的红利在哪？</h2>
+    <div class="lead">基于前面所有调研，给新人划重点。</div>
+    <div class="grid2">
+      <div class="card">
+        <h4>🔥 四大红利</h4>
+        <ul class="simple">
+          <li><b>算法更普惠</b>：不看粉丝数，看内容质量，0粉也能破百万</li>
+          <li><b>AI工具免费化</b>：剪辑/文案/封面成本趋近0</li>
+          <li><b>变现路径清晰</b>：0粉分成→千粉商单标准化</li>
+          <li><b>垂直蓝海</b>："6k打工人减脂餐"这种窄定位仍有空白</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>⚡ 四大风险</h4>
+        <ul class="simple">
+          <li><b>AI内容必须标注</b>，否则限流封号</li>
+          <li><b>创作激励下调</b>（尤其B站），不能只靠平台分成</li>
+          <li><b>同质化严重</b>，纯搬运/洗稿死路一条</li>
+          <li><b>收入极度分化</b>，92%全职者月入不足5k</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout wb">
+      <div class="ttl">💡 WorkBuddy 终极判断</div>
+      "随便发发就能火"的时代确实过去了，但2026对<b>愿意花心思、用对方法</b>的新人反而是最好时机。核心公式变成：<b>（专业深度 × 信任指数）× AI效率杠杆</b>。三个人里，最终走得最远的不会是涨粉最快的陈默，而是<b>把信任资产沉淀最深的那个</b>——因为留量 &gt; 流量。
+    </div>
+  </section>
+
+  <!-- ============ GROWTH ============ -->
+  <section class="block" id="sec-growth">
+    <h2 class="stage">📈 成长路径对比：同样30天，三条不同的路</h2>
+    <div class="lead">把三个人的累计涨粉曲线放一起看，你会明白"别和别人比，和昨天的自己比"不是鸡汤，是数学。</div>
+    <div class="chart-wrap">
+      <h4>累计粉丝数 · 第1-30天（三人对比）</h4>
+      <div id="chart-growth"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--xhs)"></span>林小满·小红书</span>
+        <span><span class="dot" style="background:var(--dy)"></span>陈默·抖音</span>
+        <span><span class="dot" style="background:var(--bz)"></span>老周·B站</span>
+      </div>
+    </div>
+
+    <table class="tbl compare-tbl" style="margin-top:18px">
+      <tr><th>指标</th><th>林小满·小红书</th><th>陈默·抖音</th><th>老周·B站</th></tr>
+      <tr><td>30天粉丝</td><td><b>1800</b></td><td><b>12000</b></td><td><b>800</b></td></tr>
+      <tr><td>首篇数据</td><td>4800阅读</td><td>1240播放</td><td>320播放</td></tr>
+      <tr><td>内容节奏</td><td>每2-3天1篇</td><td>日更</td><td>周更2-3</td></tr>
+      <tr><td>首笔收入时点</td><td>第42天</td><td>第35天</td><td>第100天</td></tr>
+      <tr><td>最大优势</td><td>搜索长尾稳</td><td>爆发力强</td><td>粉丝最铁</td></tr>
+      <tr><td>最大风险</td><td>易焦虑断更</td><td>数据起伏大</td><td>前3月没钱</td></tr>
+    </table>
+
+    <div class="journey-line" style="margin-top:24px">
+      <div class="jnode"><div class="jt">Day 0 · 三人都从"不敢发第一条"开始</div><div class="jd">小满纠结封面、陈默怕镜头、老周嫌内容不够深。共同动作：先完成再完美。</div></div>
+      <div class="jnode"><div class="jt">Day 7 · 分水岭出现</div><div class="jd">小满首篇4800阅读建立正反馈；陈默还在几百播放挣扎；老周320播放但完播率52%埋下长尾种子。</div></div>
+      <div class="jnode"><div class="jt">Day 14 · 第一个爆点</div><div class="jd">小满"记账模板"被搜索长尾推；陈默第7条破8千；老周靠2期视频攒出第一批铁粉。</div></div>
+      <div class="jnode"><div class="jt">Day 30 · 三条路成型</div><div class="jd">陈默1.2万粉领跑、小满1800粉稳进、老周800粉慢热。数字不同，但三人都过了"放弃线"。</div></div>
+      <div class="jnode"><div class="jt">Day 90 · 信任变现</div><div class="jd">小满模板付费月入500、陈默话术课月入1500、老周破万粉接花火单条5000。路径不同，殊途同归。</div></div>
+    </div>
+  </section>
+
+  <!-- ============ CRITIQUE ============ -->
+  <section class="block" id="sec-critique">
+    <h2 class="stage">💡 我的补充 / 反对 / 扩展（WorkBuddy 直言）</h2>
+    <div class="lead">你最初的思路是"列选题方向+讲新人步骤"。我把它做成了模拟器，但有几个地方我认为需要<b>直接纠正或扩展</b>：</div>
+
+    <div class="callout warn">
+      <div class="ttl">❌ 反对1：你说的"选题按出现频率排序"有误导</div>
+      你原话是"按照选题的频率出现次数"列方向。但<b>高频≠适合你</b>。美食/穿搭出现频率最高，可竞争激烈到素人几乎没机会。正确做法应是"高频需求 × 低竞争质量"交叉排序。我报告里的"第三梯队垂直赛道"（编程/设计/法律科普）出现频率低，但素人切入反而更容易——因为竞争质量低、专业壁垒高。所以排序逻辑应该反过来想：<b>找需求在、但没人做好的窄口</b>。
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">➕ 补充2：你没提"内容资产"和"私域"的权重</div>
+      整条路径里，比粉丝数重要的是<b>你沉淀了什么资产</b>。小满的Excel模板、陈默的话术库、老周的Notion系统——这些才是别人抄不走的。新人从第一天就该想：我这条内容，3年后还能不能继续带来搜索流量/信任？只追时效热点的人，热点一过归零。
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">➕ 补充3：你忽略了"多平台分发"的时机陷阱</div>
+      很多人一听"全平台"就同时开5个号。错。我让三人先死磕1个号到5000粉，再分发。原因：<b>分发的前提是已经跑通一套可复制的内容公式</b>。没跑通就分发=把错误放大5倍。老周第100天破万粉后才把视频截成抖音片段，这是正确的时序。
+    </div>
+
+    <div class="callout warn">
+      <div class="ttl">❌ 反对4：对"素人能赚钱"的预期要泼冷水</div>
+      行业数据冷冰冰：92%全职创作者月入不足5k，19%全年0收入。我做模拟器时特意让三人90天都只赚几百到一千多，就是不想给你"做自媒体能发财"的幻觉。<b>自媒体是普通人改变命运的公平赛道，但不是捷径</b>。把它当"低成本试错的副业"比当"暴富机会"健康得多。
+    </div>
+
+    <div class="callout wb">
+      <div class="ttl">➕ 扩展5：你应该考虑的"反脆弱"结构</div>
+      我建议在路径里加一步：<b>建立"不被算法绑架"的收入结构</b>。即：流量分成（公域）+ 私域社群（微信）+ 知识产品（一次制作多次售）+ 技能服务（接单）。任何单一平台的规则变动（如B站激励下调）都不会让你崩盘。这是2026年活下来的核心能力。
+    </div>
+
+    <div class="callout fact">
+      <div class="ttl">📌 一句话总结我的立场</div>
+      你的框架方向是对的（选题→步骤→需求→工具→变现），但缺了三层：<b>① 用模拟数据替代空泛建议</b>（已用本网站补齐）；<b>② 把"信任资产"置于"流量"之上</b>；<b>③ 给新人泼一盆现实的冷水</b>——先做副业、别裸辞、别信"月入过万"的幸存者偏差。
+    </div>
+
+    <div style="text-align:center;margin-top:26px">
+      <div class="big-num">现在</div>
+      <p style="color:var(--muted);margin:10px 0">打开搜索框，输入你的领域关键词——第一个联想词，就是你第一篇内容的标题。</p>
+      <div class="btn" onclick="document.querySelector('[data-target=sec-1]').click()">⬅ 回到第一步，用三个人的眼睛再看一遍</div>
+    </div>
+  </section>
+
+  <!-- ============ PERSONA LIBRARY ============ -->
+  <section class="block" id="sec-library">
+    <h2 class="stage">👥 素人画像库：16种人的真实起点</h2>
+    <div class="lead">新人不只有"小红书图文/抖音口播/B站中长"三种。人是多样的（身份、资源、动机不同），也是有阶段性的（入行前→冷启动→瓶颈→稳定→变现）。下面用三个轴把一个新人"钉"住，再给每个画像配真实可参考的冷启动依据。</div>
+
+    <div class="grid3">
+      <div class="card">
+        <h4>轴一 · 人生阶段</h4>
+        <p class="kv">在校生 / 职场新人 / 资深打工人 / 宝妈 / 中年转型·失业 / 银发退休 / 乡镇返乡 / 蓝领 / 自由职业 / 实体店主 / 体制内 / 海归 / 特殊群体……</p>
+        <p class="kv" style="color:var(--muted)">同样的"省钱"选题，大学生和退休阿姨讲出来是完全不同的内容。</p>
+      </div>
+      <div class="card">
+        <h4>轴二 · 资源约束</h4>
+        <p class="kv">零预算纯手机 / 有时间无钱 / 有积蓄无时间 / 有设备但新手 / 技能型资产 / 有团队MCN背景</p>
+        <p class="kv" style="color:var(--muted)">起点不是"想做什么"，而是"你手里有什么"。资源决定打法。</p>
+      </div>
+      <div class="card">
+        <h4>轴三 · 内容形式 × 平台</h4>
+        <p class="kv">小红书图文 / 抖音短视频 / 视频号 / B站中长 / 知乎图文 / 快手 / 播客音频 / 跨平台矩阵</p>
+        <p class="kv" style="color:var(--muted)">形式选错=用错语言对话错的人。平台由内容形式倒推。</p>
+      </div>
+    </div>
+
+    <div class="callout fact">
+      <div class="ttl">📌 第四维：成长阶段（当前所处）</div>
+      每个画像都标了"当前阶段"：<b>入行前(观望)</b> → <b>冷启动(0-1月)</b> → <b>瓶颈期(1-3月)</b> → <b>稳定期(3-6月)</b> → <b>变现期(6月+)</b>。不同阶段的核心痛点和动作完全不同，别拿变现期的要求苛责冷启动的新人。
+    </div>
+
+    <div class="filters" id="filters">
+      <div class="filter-group"><span class="fg-title">人生阶段</span><div data-dim="stage" id="fg-stage"></div></div>
+      <div class="filter-group"><span class="fg-title">资源约束</span><div data-dim="res" id="fg-res"></div></div>
+      <div class="filter-group"><span class="fg-title">内容×平台</span><div data-dim="plat" id="fg-plat"></div></div>
+      <div class="filter-group"><span class="fg-title">成长阶段</span><div data-dim="grow" id="fg-grow"></div></div>
+      <div class="filter-group"><span class="fg-title">表达风格</span><div data-dim="style" id="fg-style"></div></div>
+      <button class="reset-btn" id="resetBtn">重置筛选</button>
+    </div>
+
+    <p class="toc-note" id="libCount"></p>
+    <div class="persona-grid" id="personaGrid"></div>
+  </section>
+
+  <div class="footer">
+    2026素人自媒体成长模拟器 · 数据基于公开行业报告与平台政策模拟生成，仅供方法参考<br>
+    构建：WorkBuddy · 三人视角叙事 + 真实感数据曲线 + 批判性补充
+  </div>
+</main>
+
+<script>
+// ---------- 模拟数据 ----------
+const DATA = {
+  xhsViews:  [200,350,180,420,600,280,1500,3200,900,4500,6800,5200],
+  dyViews:   [120,300,80,500,1500,400,8000,200,600,300,12000,450,900,50000,300,700,400,1500,200,11000],
+  bzViews:   [320,500,1200,800,2500,4000,1800,6000],
+  growth: {
+    xhs: [0,15,28,35,60,80,140,320,410,780,1300,1800],
+    dy:  [0,8,15,18,35,60,90,500,580,650,1800,12000],
+    bz:  [0,12,30,55,90,180,320,520,680,720,760,800]
+  }
+};
+
+// ---------- SVG 折线图 ----------
+function lineChart(elId, dataArr, color, labels){
+  const w=560,h=240,pad=34;
+  const max=Math.max(...dataArr)*1.1;
+  const n=dataArr.length;
+  const x=i=> pad + i*(w-pad*2)/(n-1);
+  const y=v=> h-pad - (v/max)*(h-pad*2);
+  let pts=dataArr.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  let grid='';
+  for(let g=0;g<=4;g++){const gy=pad+g*(h-pad*2)/4; grid+=`<line x1="${pad}" y1="${gy}" x2="${w-pad}" y2="${gy}" stroke="#2a3140" stroke-width="1"/>`;}
+  let dots=dataArr.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${color}"/>`).join('');
+  let xl='';
+  if(labels){labels.forEach((lb,i)=>{ if(i%Math.ceil(n/labels.length)===0 || i===n-1){xl+=`<text x="${x(i)}" y="${h-12}" fill="#9aa7b8" font-size="9" text-anchor="middle">${lb}</text>`;}});}
+  const svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+    ${grid}
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5"/>
+    ${dots}${xl}
+    <text x="${pad}" y="14" fill="#9aa7b8" font-size="10">峰值 ${max.toFixed(0)}</text>
+  </svg>`;
+  document.getElementById(elId).innerHTML=svg;
+}
+
+// growth 多线
+function growthChart(){
+  const w=620,h=300,pad=40;
+  const all=[...DATA.growth.xhs,...DATA.growth.dy,...DATA.growth.bz];
+  const max=Math.max(...all)*1.1;
+  const n=DATA.growth.xhs.length;
+  const x=i=> pad + i*(w-pad*2)/(n-1);
+  const y=v=> h-pad - (v/max)*(h-pad*2);
+  let grid='';
+  for(let g=0;g<=4;g++){const gy=pad+g*(h-pad*2)/4; grid+=`<line x1="${pad}" y1="${gy}" x2="${w-pad}" y2="${gy}" stroke="#2a3140" stroke-width="1"/>`;}
+  let lines='';
+  const colors={xhs:'#ff2e4d',dy:'#23e3ff',bz:'#fb7299'};
+  Object.keys(DATA.growth).forEach(k=>{
+    const arr=DATA.growth[k];
+    const pts=arr.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const dots=arr.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.5" fill="${colors[k]}"/>`).join('');
+    lines+=`<polyline points="${pts}" fill="none" stroke="${colors[k]}" stroke-width="2.5"/>${dots}`;
+  });
+  let xl=[5,10,15,20,25,30].map(d=>`<text x="${x((d-1)/1)}" y="${h-16}" fill="#9aa7b8" font-size="9" text-anchor="middle">D${d}</text>`).join('');
+  const svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${grid}${lines}${xl}</svg>`;
+  document.getElementById('chart-growth').innerHTML=svg;
+}
+
+// ---------- 渲染 ----------
+function renderCharts(){
+  lineChart('chart-xhs-views', DATA.xhsViews, '#ff2e4d');
+  lineChart('chart-dy-views', DATA.dyViews, '#23e3ff');
+  lineChart('chart-bz-views', DATA.bzViews, '#fb7299');
+  growthChart();
+}
+
+// ---------- 交互：标签页 ----------
+document.querySelectorAll('.tabs').forEach(group=>{
+  const tabs=group.querySelectorAll('.tab');
+  tabs.forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      const p=tab.dataset.p;
+      // 同组标签切换
+      group.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      // 找到同 section 下的 ptab-content
+      const section=group.closest('section');
+      section.querySelectorAll('.ptab-content').forEach(c=>{
+        c.classList.toggle('active', c.dataset.p===p);
+      });
+    });
+  });
+});
+
+// ============= 新导航系统 =============
+const NAV_ITEMS = [
+  {grp:'开始', items:[{label:'00 · 三个素人登场', target:'sec-intro'}]},
+  {grp:'主题逐个拆解（11步）', items:[
+    {label:'01 · 明确定位', target:'sec-1'},{label:'02 · 选择平台', target:'sec-2'},
+    {label:'03 · 账号搭建', target:'sec-3'},{label:'04 · 内容规划', target:'sec-4'},
+    {label:'05 · 工具准备', target:'sec-5'},{label:'06 · 发布运营', target:'sec-6'},
+    {label:'07 · 数据复盘', target:'sec-7'},{label:'08 · 变现路径', target:'sec-8'},
+    {label:'09 · 心理建设', target:'sec-9'},{label:'10 · 30天执行', target:'sec-10'},
+    {label:'11 · 2026趋势', target:'sec-11'}
+  ]},
+  {grp:'总览与我的观点', items:[
+    {label:'📈 成长路径对比', target:'sec-growth'},{label:'💡 我的补充/反对', target:'sec-critique'},
+    {label:'👥 素人画像库', target:'sec-library'}
+  ]}
+];
+
+function navGo(target){
+  const el=document.getElementById(target);
+  if(el){el.scrollIntoView({behavior:'smooth'});}
+  updateNavActive(target);
+  closeDrawer();
+  document.getElementById('navDrop')?.classList.remove('open');
+}
+function updateNavActive(target){
+  document.querySelectorAll('.drop-menu a, .drawer a, .bottom-tab .bt-item').forEach(x=>{
+    x.classList.toggle('active', x.dataset.target===target);
+  });
+}
+
+// Build drop menu
+(function(){
+  const dm=document.getElementById('dropMenu');
+  const drawer=document.getElementById('drawer');
+  if(!dm || !drawer) return;
+  let dmHTML='', drHTML='';
+  NAV_ITEMS.forEach(g=>{
+    dmHTML+=`<div class="grp">${g.grp}</div>`;
+    drHTML+=`<div class="grp">${g.grp}</div>`;
+    g.items.forEach(it=>{
+      dmHTML+=`<a data-target="${it.target}" onclick="navGo('${it.target}')">${it.label}</a>`;
+      drHTML+=`<a data-target="${it.target}" onclick="navGo('${it.target}')">${it.label}</a>`;
+    });
+  });
+  dm.innerHTML=dmHTML;
+  drawer.innerHTML=`<span class="drawer-close" onclick="closeDrawer()">×</span><div style="font-weight:800;color:var(--accent);margin-bottom:10px;font-size:14px">📱 素人成长模拟器</div>`+drHTML;
+})();
+
+// Dropdown toggle
+document.getElementById('dropBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('navDrop').classList.toggle('open');});
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-drop')) document.getElementById('navDrop')?.classList.remove('open');});
+
+// Bottom tab clicks
+document.querySelectorAll('.bottom-tab .bt-item').forEach(b=>{
+  b.addEventListener('click',()=>navGo(b.dataset.target));
+});
+
+// Drawer: hamburger trigger via bottom-tab long-press or dedicated button
+// We add a "more" item in bottom-tab that opens drawer
+(function(){
+  const bt=document.getElementById('bottomTab');
+  if(!bt) return;
+  const more=document.createElement('div');
+  more.className='bt-item'; more.dataset.target='_drawer';
+  more.innerHTML='<span class="bt-icon">☰</span>更多';
+  more.addEventListener('click',()=>{document.getElementById('drawerOverlay').classList.add('show');document.getElementById('drawer').classList.add('show');});
+  bt.appendChild(more);
+})();
+function closeDrawer(){
+  document.getElementById('drawerOverlay').classList.remove('show');
+  document.getElementById('drawer').classList.remove('show');
+}
+
+// 滚动联动高亮
+const sections=[...document.querySelectorAll('main section.block, main .hero')];
+window.addEventListener('scroll',()=>{
+  let cur='sec-intro';
+  sections.forEach(s=>{ if(s.getBoundingClientRect().top<=140) cur=s.id; });
+  updateNavActive(cur);
+});
+
+renderCharts();
+
+// ================= 素人画像库 =================
+// (modal markup injected below)
+const PERSONAS = [
+  // ====== 模拟器三人组（补充进画像库） ======
+  { id:101, name:'林小满', letter:'林', color:'#ff5a5f',
+    stage:'资深打工人', res:'零预算纯手机', plat:'小红书·图文', grow:'稳定期',
+    style:'清单型·手作',
+    motivation:'记录 + 赚零花钱',
+    scene:'月薪6k省钱记账/存钱模板',
+    pain:'完美主义拖延，封面没做好不敢发',
+    tip:'60分钟完成一条法则；靠搜索长尾流量破冷启动；资源类内容收藏率最高',
+    firstTitle:'月薪6k打工人的记账模板：工资到手先存20%',
+    real:'2026小红书：新号不投流单篇多在500以内；优质首篇24h阅读4800、互动3.2%。她30天涨粉1800，第42天破千粉接首单商单。' },
+
+  { id:102, name:'陈默', letter:'默', color:'#23e3ff',
+    stage:'职场新人', res:'有时间无钱', plat:'抖音·口播', grow:'变现期',
+    style:'话痨型·半露脸',
+    motivation:'表达欲 + 副业增收',
+    scene:'职场避坑/话术拆解口播，戴口罩半露脸',
+    pain:'社恐面对镜头僵硬；连发5条几百播放想放弃',
+    tip:'用"前3秒强钩子+真实案例"结构；戴口罩降低心理门槛；复制爆款结构',
+    firstTitle:'领导说"辛苦了"——别回"应该的"，3句话反拿捏',
+    real:'2026抖音算法：完播率权重40%、互动率30%。第7条爆款破8千播放，30天涨粉1.2万，第35天破千粉开橱窗带货。' },
+
+  { id:103, name:'老周', letter:'周', color:'#fb7299',
+    stage:'自由职业', res:'有设备新手', plat:'B站·中长', grow:'稳定期',
+    style:'手作型·深度',
+    motivation:'兴趣 + 个人品牌',
+    scene:'普通人学习方法/效率工具教程',
+    pain:'B站冷启动最慢，前3个月几乎零收入',
+    tip:'做"常青内容"不追热点；用深度换完播和信任；千粉后花火商单是真正收入',
+    firstTitle:'考研失败后，我用这3个方法重新跑通学习系统',
+    real:'B站：千粉月入几十到三百，创作激励万播15-40元。但万粉后花火商单条约5000元。他90天破万粉，靠"错题本方法"长尾持续吸粉。' },
+
+  // ====== 画像库16人（扩版） ======
+  { id:1, name:'小棠', letter:'棠', color:'#7c5cff',
+    stage:'在校生', res:'有时间无钱', plat:'小红书·图文', grow:'冷启动',
+    style:'清单型·纯图文',
+    motivation:'赚生活费 + 简历镀金',
+    scene:'校园/学习干货/宿舍好物，小红书+B站双发',
+    pain:'课业与更新冲突；怕接三无广告毁掉个人IP',
+    tip:'校园垂类起号最快、变现路径最短；内容可复用进求职作品集。守住底线，不接三无广告',
+    firstTitle:'大学生宿舍好物清单：大一到大四都买不错',
+    real:'2026真实参考：大学生小红书电商副业每天2h可月入8000+；校园博主"多平台布局、单平台深耕"，B站粘性最高。最忌接欺诈营销。' },
+
+  { id:2, name:'阿宇', letter:'宇', color:'#4cc9f0',
+    stage:'职场新人', res:'有时间无钱', plat:'抖音·短视频', grow:'冷启动',
+    style:'话痨型·半露脸',
+    motivation:'表达欲 + 副业增收',
+    scene:'职场避坑/话术拆解口播，戴口罩半露脸',
+    pain:'社恐面对镜头僵硬；前几条播放个位数想放弃',
+    tip:'用"前3秒强钩子+真实案例"结构；戴口罩降低心理门槛；先日更冲播放量',
+    firstTitle:'试用期千万别做的3件事——HR不会告诉你',
+    real:'2026抖音算法：完播率权重40%、互动率30%。一条"领导说辛苦了怎么回"类口播，完播过40%即进下一级流量池。' },
+
+  { id:3, name:'可乐妈', letter:'可', color:'#ff9f43',
+    stage:'宝妈', res:'时间碎片化', plat:'小红书·图文', grow:'冷启动',
+    style:'真实记录型·手机随手拍',
+    motivation:'赚奶粉钱 + 同频社交',
+    scene:'育儿好物/辅食/真实带娃日常',
+    pain:'娃睡了才能做，时间碎片化无法连续工作；精力被严重切割',
+    tip:'用带娃真实日常，越真实越打动人；AI图文带货模板可批量生产；善用定时发布囤稿',
+    firstTitle:'一岁宝宝的一周辅食不重样（附清单打印版）',
+    real:'2026真实参考：宝妈用AI提示词模板上架"育儿难题解法"，第4个月月入5600元；二胎宝妈"真实带娃日常"最易起号。' },
+
+  { id:4, name:'老王', letter:'王', color:'#ff5a5f',
+    stage:'中年转型·失业', res:'有积蓄无时间', plat:'抖音·短视频', grow:'变现期',
+    style:'话痨型·真人出镜',
+    motivation:'被迫副业 → 找回价值感',
+    scene:'中年失业副业/转型心路口播+知乎长文',
+    pain:'怕被前同事熟人看见；年龄焦虑；同时要投简历养家',
+    tip:'真实故事+方法论最打动人；先别裸辞；让过去职业经验在互联网发光',
+    firstTitle:'失业第47天，我在抖音发了条视频——播放300万',
+    real:'2026真实案例：失业中年发"失业做啥副业"视频播放300万，橱窗月入2万；40岁编辑转行短视频，一条真实讲述涨粉15万。' },
+
+  { id:5, name:'张姨', letter:'张', color:'#b692ff',
+    stage:'银发退休', res:'有闲有钱', plat:'视频号·短视频', grow:'冷启动',
+    style:'真实记录型·慢节奏',
+    motivation:'价值感 + 隔代社交',
+    scene:'养生/带孙/退休生活/教用手机',
+    pain:'不懂剪辑；容易被"AI致富"培训班割韭菜',
+    tip:'适老化内容缺口巨大，真实生活最破圈；视频号私域联动适合银发；绝对避开收费培训骗局',
+    firstTitle:'退休第一天做啥？我花了300块把阳台变成小花园',
+    real:'2026数据：抖音中老年用户已达1.74亿，适老化内容缺口60%。57岁月入5000+、72岁教调手机月入过万。同时警惕"AI培训坑老"连环套路。' },
+
+  { id:6, name:'阿土', letter:'土', color:'#3ddc97',
+    stage:'乡镇返乡', res:'零预算纯手机', plat:'抖音·短视频', grow:'冷启动',
+    style:'真实记录型·田野',
+    motivation:'帮家乡 + 自己增收',
+    scene:'三农/乡村烟火气/村播助农',
+    pain:'物流与供应链薄弱；内容容易同质化',
+    tip:'一部手机"带飞"全村；真实乡村生活最打动城市用户；村播助农有平台扶持',
+    firstTitle:'回村第3天：用一部手机把家乡的春笋卖到省外',
+    real:'2026真实案例：95后返乡青年一部手机直播助农，把春笋山核桃卖向全国；抖音"山货上头条"已扶持49个乡村产业。' },
+
+  { id:7, name:'大强', letter:'强', color:'#ffd166',
+    stage:'蓝领工人', res:'零预算纯手机', plat:'快手·短视频', grow:'入行前',
+    style:'手作型·技能',
+    motivation:'记录生活 + 赚外快',
+    scene:'工地日常/技能展示/班组趣事',
+    pain:'觉得"农民工不适合做自媒体"，不敢开始',
+    tip:'蓝领真实生活有天然流量；技能展示可接工具类商单；快手对下沉内容更友好',
+    firstTitle:'工地焊工的一天：2分钟看完就知道钱怎么挣的',
+    real:'快手"壮乡大牛"由4名返乡青年共创，靠真实乡村美食获大量关注。蓝领/新农人内容在下沉市场信任度高、竞争相对低。' },
+
+  { id:8, name:'老赵', letter:'赵', color:'#ff9f43',
+    stage:'体制内', res:'有时间怕违规', plat:'知乎·图文', grow:'入行前',
+    style:'纯文字型·深度',
+    motivation:'表达 + 轻变现',
+    scene:'匿名写职场认知/体制内生存长文',
+    pain:'怕身份暴露、怕触碰敏感话题被追责',
+    tip:'匿名知乎写认知长文，不露脸不实名；避开政策敏感领域；用"方法/思维"替代"单位/事件"',
+    firstTitle:'体制内十年，我总结的5条"不犯错也不吃亏"法则',
+    real:'知乎高知用户多、长文搜索流量持久。体制内创作者普遍选择匿名+图文形式降低合规风险，靠专业回答建立人设后再变现。' },
+
+  { id:9, name:'Lina', letter:'L', color:'#ff6a88',
+    stage:'宝妈', res:'有设备新手', plat:'小红书·图文', grow:'稳定期',
+    style:'真人出镜·审美型',
+    motivation:'复出 + 经济独立',
+    scene:'穿搭/家居/直播带货',
+    pain:'长时间断档后重启，流量权重归零',
+    tip:'直播建立信任最高效；家居场景化内容易种草；重启先补发旧领域内容找回标签',
+    firstTitle:'带娃三年重回职场失败，我转做小红书的第一天',
+    real:'宝妈从零起步做小红书母婴号，有案例3个月涨粉5万、单条爆款。直播+图文组合是宝妈复出最常见的"信任变现"路径。' },
+
+  { id:10, name:'阿杰', letter:'杰', color:'#4cc9f0',
+    stage:'自由职业', res:'技能型资产', plat:'B站·中长', grow:'稳定期',
+    style:'手作型·教程',
+    motivation:'接单 + 个人IP',
+    scene:'设计/剪辑/运营技能教学，B站+小红书',
+    pain:'时间全在帮客户接单，没空做自己的内容IP',
+    tip:'把接单案例改成教学内容反哺IP；一次制作多次售卖；用作品集引流咨询',
+    firstTitle:'我用3个免费工具帮客户做了一套品牌视觉——全流程公开',
+    real:'B站"运营专家+自媒体"模式：做代运营服务，同时分享经验做咨询课程。核心是"别抛弃老本行，让它上网发光"。' },
+
+  { id:11, name:'小光', letter:'光', color:'#7c5cff',
+    stage:'特殊群体', res:'资源受限', plat:'播客·音频', grow:'入行前',
+    style:'纯声音型·叙事',
+    motivation:'发声 + 互助',
+    scene:'无障碍科普/听障日常，播客+知乎图文',
+    pain:'部分平台无障碍支持有限；表达门槛高',
+    tip:'音频/图文降低表达门槛；用真实经历做差异化；先服务同温层再外扩',
+    firstTitle:'听不见的我，怎么在咖啡馆点了一杯拿铁（播客第一期）',
+    real:'听障、视障等群体通过播客/图文做"无障碍科普"正形成细分赛道，真实经历本身就是稀缺内容资产，平台对无障碍内容有流量倾斜。' },
+
+  { id:12, name:'Cindy', letter:'C', color:'#23e3ff',
+    stage:'海归外语', res:'有积蓄双语', plat:'小红书·图文', grow:'冷启动',
+    style:'清单型·双语',
+    motivation:'分享 + 咨询变现',
+    scene:'留学/外语/文化对比干货',
+    pain:'留学博主赛道拥挤，难突围',
+    tip:'用"文化对比+实用干货"做差异；咨询/文书服务变现客单价高；双语内容稀缺',
+    firstTitle:'留学3年回国才发现：这5个习惯在国外正常、在国内社死',
+    real:'小红书女性用户多、消费力强，留学/外语类内容搜索需求稳定。海归的"中外对比"视角是本土创作者难替代的差异点。' },
+
+  { id:13, name:'陈姐', letter:'陈', color:'#3ddc97',
+    stage:'实体店主', res:'有店铺有预算', plat:'视频号·短视频', grow:'冷启动',
+    style:'真实记录型·门店',
+    motivation:'引流到店 + 带货',
+    scene:'同城探店/门店日常/团购',
+    pain:'不会拍；同城流量获取难',
+    tip:'视频号私域联动（好友点赞自动推给好友）最适合本地；同城团购组件直接转化',
+    firstTitle:'开了三年店，今天第一次拍——我的面馆凌晨4点的样子',
+    real:'视频号60%流量来自社交推荐，发布后转发朋友圈/微信群即可撬动初始转发。适合门店、本地服务、中老年客群。' },
+
+  { id:14, name:'阿浩', letter:'浩', color:'#ffd166',
+    stage:'乡镇返乡', res:'零预算手机', plat:'抖音·中视频', grow:'瓶颈期',
+    style:'话痨型·娱乐',
+    motivation:'兴趣 + 赚零花',
+    scene:'本地游戏/搞笑/小镇生活',
+    pain:'内容同质化，流量卡在瓶颈期难突围',
+    tip:'加"本地化+人设记忆点"破同质化；中视频比短视频更容易沉淀粉丝；固定栏目化',
+    firstTitle:'我在十八线小城做的3个副业：第一个你绝对想不到',
+    real:'抖音中视频伙伴计划有稳定收益，一条优质视频可吃数月长尾。小镇青年做"本地化内容"在下沉市场有天然亲近感。' },
+
+  { id:15, name:'梅姐', letter:'梅', color:'#ff5a5f',
+    stage:'中年转型·失业', res:'零预算(负债)', plat:'抖音·短视频', grow:'变现期',
+    style:'真人出镜·叙事',
+    motivation:'还债 + 翻身',
+    scene:'负债逆袭实录/中年重启',
+    pain:'心理压力极大；起步资源几乎为零',
+    tip:'用AI批量生成选题再筛爆款；真实故事+资源包钩子引流；先副业别裸辞',
+    firstTitle:'42岁负债80万，我做对3件事：第5天收入反超工资',
+    real:'2026真实案例：40岁负债失业到月入过万，测试12个领域锁定"中年转型"赛道，AI生成100选题筛3爆款，标题用"痛点+数字悬念"公式。' }
+];
+
+const DIM_LABEL = { stage:'人生阶段', res:'资源约束', plat:'内容×平台', grow:'成长阶段', style:'表达风格' };
+const activeFilters = { stage:new Set(), res:new Set(), plat:new Set(), grow:new Set(), style:new Set() };
+
+function uniqueVals(dim){ return [...new Set(PERSONAS.map(p=>p[dim]))]; }
+
+function buildFilters(){
+  ['stage','res','plat','grow','style'].forEach(dim=>{
+    const box=document.getElementById('fg-'+dim);
+    if(!box) return;
+    uniqueVals(dim).forEach(v=>{
+      const b=document.createElement('button');
+      b.className='fbtn'; b.textContent=v; b.dataset.val=v; b.dataset.dim=dim;
+      b.addEventListener('click',()=>{
+        if(activeFilters[dim].has(v)){activeFilters[dim].delete(v);b.classList.remove('active');}
+        else{activeFilters[dim].add(v);b.classList.add('active');}
+        renderPersonas();
+      });
+      box.appendChild(b);
+    });
+  });
+  document.getElementById('resetBtn').addEventListener('click',()=>{
+    ['stage','res','plat','grow','style'].forEach(d=>activeFilters[d].clear());
+    document.querySelectorAll('#filters .fbtn').forEach(b=>b.classList.remove('active'));
+    renderPersonas();
+  });
+}
+
+function tagClass(dim){ return dim==='stage'?'stage':dim==='res'?'res':dim==='plat'?'plat':dim==='grow'?'grow':'stage'; }
+
+function renderPersonas(){
+  const grid=document.getElementById('personaGrid');
+  const list=PERSONAS.filter(p=>{
+    return ['stage','res','plat','grow','style'].every(d=> activeFilters[d].size===0 || activeFilters[d].has(p[d]));
+  });
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='pcard2';
+    const styleTag = p.style ? `<span class="ptag stage">${p.style}</span>` : '';
+    card.innerHTML=`
+      <div class="pname"><span class="pavatar" style="background:${p.color}">${p.letter}</span>${p.name}</div>
+      <div class="ptags">
+        <span class="ptag stage">${p.stage}</span>
+        <span class="ptag grow">${p.grow}</span>
+        <span class="ptag res">${p.res}</span>
+        <span class="ptag plat">${p.plat}</span>
+        ${styleTag}
+      </div>
+      <div class="pone">${p.scene}</div>
+      ${p.firstTitle ? `<div class="pcount" style="color:var(--accent2);font-size:11px;margin:4px 0">🎯 首条：${p.firstTitle}</div>` : ''}
+      <div class="pcount">点击查看完整画像 →</div>`;
+    card.addEventListener('click',()=>openModal(p));
+    grid.appendChild(card);
+  });
+  document.getElementById('libCount').textContent = `当前显示 ${list.length} / ${PERSONAS.length} 个画像` + (list.length===0?'（无匹配，请重置筛选）':'');
+}
+
+function openModal(p){
+  const mask=document.getElementById('modalMask');
+  const rows=[
+    ['人生阶段',p.stage],['表达风格',p.style||'未标注'],['资源约束',p.res],['内容形式×平台',p.plat],['当前成长阶段',p.grow],
+    ['核心动机',p.motivation],['内容场景',p.scene],['最大卡点',p.pain],['破局建议',p.tip]
+  ];
+  if(p.firstTitle) rows.splice(5,0,['🎯 第一天就该发的内容标题',p.firstTitle]);
+  let body=rows.map(r=>`<div class="mrow"><span class="ml">${r[0]}</span><span class="mv">${r[1]}</span></div>`).join('');
+  let mbody=rows.map(r=>`<div class="mrow"><span class="ml">${r[0]}</span><span class="mv">${r[1]}</span></div>`).join('');
+  document.getElementById('modalBody').innerHTML=`
+    <div class="close" onclick="closeModal()">×</div>
+    <h3><span class="pavatar" style="background:${p.color};width:38px;height:38px;font-size:16px">${p.letter}</span>${p.name}</h3>
+    <div class="msub">${p.stage} · ${p.plat} · 当前处于「${p.grow}」</div>
+    ${mbody}
+    <div class="real">📊 <b>真实参考依据：</b>${p.real}</div>`;
+  mask.classList.add('show');
+}
+function closeModal(){ document.getElementById('modalMask').classList.remove('show'); }
+
+buildFilters();
+renderPersonas();
+
+</script>
+
+<div class="modal-mask" id="modalMask" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+</body>
+</html>
